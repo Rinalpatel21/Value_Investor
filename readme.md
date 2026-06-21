@@ -1,4 +1,4 @@
-# 🤖 Autonomous Bitcoin Trading Agent
+# Autonomous Bitcoin Trading Agent
 
 An AI-powered Bitcoin trading system designed to operate with minimal human supervision and continuously adapt to changing market conditions. The system combines **Dollar-Cost Averaging (DCA)**, **ATR-based risk management**, **market regime detection**, and **dynamic strategy selection** to manage Bitcoin positions while protecting capital.
 
