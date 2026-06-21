@@ -1,0 +1,14 @@
+{
+    "total_budget": 10000,
+    "dca_budget": 7000,
+    "swing_budget": 3000,
+
+    "dca_trigger_pct": 0.03,
+    "dca_amount": 500,
+
+    "atr_multiplier": 1.5,
+
+    "portfolio_stop_pct": 0.25,
+
+    "trading_mode": "HYBRID"
+}
