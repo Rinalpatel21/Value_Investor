@@ -6,3 +6,8 @@ send_message(
 
 print("Message Sent")
 
+result = send_message(
+    "BTC Trading Agent Test Message"
+)
+
+print(result)

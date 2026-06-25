@@ -3,7 +3,7 @@ def atr_opportunity_buy(
         current_price,
         current_time,
         atr):
-    """Buy on significant dips (2*ATR)"""
+    
     if portfolio.dca_avg_cost == 0:
         return
 
@@ -32,7 +32,7 @@ def dca_protective_sell(
         portfolio,
         current_price,
         atr):
-    """Protective sell at 3*ATR loss to limit damage"""
+    
     if portfolio.btc_dca == 0:
 
         return

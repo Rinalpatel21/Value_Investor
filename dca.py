@@ -29,4 +29,16 @@ def execute_dca_buy(
         f"DCA BUY | {current_time} | Price={current_price:.2f}"
     )
 
+    from logger import log_trade
+
+    from telegram_bot import send_message
+
+    log_trade(current_time,
+    "DCA BUY",
+    current_price,
+    amount,
+    btc_bought)
+
+    send_message(f"DCA BUY\nPrice={current_price:.2f}\nAmount=${amount}")
+
     

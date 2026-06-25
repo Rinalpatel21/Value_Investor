@@ -1,12 +1,35 @@
+
+
 {
-    "total_budget": 10000,
-    "dca_budget": 7000,
-    "swing_budget": 3000,
+    "initial_capital":10000,
+
+    "dca_buy_1":500,
+    "dca_buy_2":700,
+    "dca_buy_3":1000,
+
+    "drop_1":0.03,
+    "drop_2":0.06,
+    "drop_3":0.09,
+
+    "atr_stop_multiplier":2,
+
+    "take_profit_multiplier":3,
+
+    "final_target_multiplier":5,
+
+    "portfolio_stop":0.25,
+
+    "trade_cooldown_hours":6,
+
+    "swing_risk_pct":0.01,
+
+    "atr_opportunity_multiplier":2,
+
+    "protective_sell_multiplier":3,
+
+    "protective_sell_percent":0.20, 
 
     "dca_trigger_pct": 0.03,
-    "dca_amount": 500,
-
-    "atr_multiplier": 1.5,
 
     "portfolio_stop_pct": 0.25,
 

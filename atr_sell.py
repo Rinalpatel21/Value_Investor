@@ -1,3 +1,7 @@
+from telegram_bot import send_message
+from trade_logger import log_trade
+
+
 def manage_active_trades(
         portfolio,
         current_price,
@@ -48,6 +52,17 @@ def manage_active_trades(
 
             print(f"STOP LOSS | Exit={current_price:.2f} | PnL={pnl:.2f}")
 
+            log_trade("STOP LOSS",
+                       current_price,
+                       trade["quantity"],
+                       pnl,
+                      current_time
+                     )
+
+            send_message(f"STOP LOSS | Exit={current_price:.2f} | PnL={pnl:.2f}")
+
+            
+
         elif current_price >= trade["final_target"]:
 
             pnl = (
@@ -74,9 +89,25 @@ def manage_active_trades(
 
             print(f"TAKE PROFIT | Exit={current_price:.2f} | PnL={pnl:.2f}")
 
+            log_trade("TAKE PROFIT",
+                       current_price,
+                       trade["quantity"],
+                       pnl,
+                       current_time
+                    )
+
+            send_message(f"TAKE PROFIT | Exit={current_price:.2f} | PnL={pnl:.2f}")
+
+        
+        
         else:
 
             remaining_trades.append(trade)
+        
+        
+
 
     portfolio.active_trades = remaining_trades
+    
+    
     

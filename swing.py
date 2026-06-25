@@ -1,3 +1,9 @@
+from logging import config
+
+from config import load_config
+from telegram_bot import send_message
+
+
 def swing_entry_signal(row):
     """Entry on strong momentum with quality filters"""
     if (
@@ -20,7 +26,8 @@ def swing_entry_signal(row):
 def open_swing_trade(
         portfolio,
         current_price,
-        atr):
+        atr,
+        current_time):
 
     #################################
     # Risk 0.5% of cash (reduced for better Sharpe)
@@ -32,7 +39,10 @@ def open_swing_trade(
     # Stop distance (tighter for better risk/reward)
     #################################
 
-    stop_distance = 1.5 * atr
+   
+    config = load_config()
+
+    stop_distance = config["atr_stop_multiplier"] * atr
 
     quantity = risk_amount / stop_distance
 
@@ -56,9 +66,9 @@ def open_swing_trade(
 
         "partial_target": current_price + 3 * atr,
 
-        "target": current_price + 6 * atr,
+        "target": current_price + config["take_profit_multiplier"] * atr,
 
-        "final_target": current_price + 9 * atr,
+        "final_target": current_price + (config["final_target_multiplier"] * atr),
 
         "quantity": quantity,
 
@@ -81,3 +91,13 @@ def open_swing_trade(
         f"Qty={quantity:.5f}"
 
     )
+
+    send_message(f"SWING BUY\nPrice={current_price:.2f}\nQty={quantity:.5f}")
+
+    from trade_logger import log_trade
+
+    log_trade("SWING_BUY",
+              current_price,
+              quantity,
+              0,
+              current_time)

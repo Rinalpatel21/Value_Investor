@@ -28,6 +28,10 @@ from risk_manager import portfolio_stop
 
 from performance import calculate_metrics
 
+from config_loader import load_config
+
+config = load_config()
+
 
 ########################################
 # LOAD DATA
@@ -44,7 +48,7 @@ df = add_indicators(df)
 # INITIALIZE PORTFOLIO
 ########################################
 
-initial_capital = 10000
+initial_capital = config["initial_capital"]
 
 portfolio = Portfolio(initial_capital)
 
@@ -123,23 +127,23 @@ for i in range(0, len(df)):
 
         # Regular DCA Buy
 
-        if drop_pct >= 0.09:
+        if drop_pct >= config["drop_3"]:
 
-             amount = 1000
+          amount = config["dca_buy_3"]
 
-        elif drop_pct >= 0.06:
+        elif drop_pct >= config["drop_2"]:
 
-             amount = 700
+            amount = config["dca_buy_2"]
 
-        elif drop_pct >= 0.03:
+        elif drop_pct >= config["drop_1"]:
 
-             amount = 500
+           amount = config["dca_buy_1"]
 
         else:
 
-             amount = 0
+           amount = 0
 
-        if amount > 0:
+    if amount > 0:
 
            execute_dca_buy(
              portfolio,
@@ -151,7 +155,7 @@ for i in range(0, len(df)):
 
         # ATR Opportunity Buy
 
-        atr_opportunity_buy(
+           atr_opportunity_buy(
 
             portfolio,
 
@@ -166,7 +170,7 @@ for i in range(0, len(df)):
 
         # DCA Protective Sell
 
-        dca_protective_sell(
+           dca_protective_sell(
 
             portfolio,
 
@@ -223,7 +227,8 @@ for i in range(0, len(df)):
                 open_swing_trade(
                     portfolio,
                     current_price,
-                    atr
+                    atr, 
+                    current_time
                 )
     ####################################
     # MANAGE ACTIVE TRADES
