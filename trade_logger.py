@@ -2,12 +2,13 @@ import csv
 import os
 
 
-def log_trade(
+def log_trade(timestamp,
         trade_type,
         price,
-        quantity,
-        pnl,
-        timestamp):
+        investment_amount,
+        btc_bought,
+        pnl):
+
 
     file_exists = os.path.isfile("trade_log.csv")
 
@@ -25,12 +26,16 @@ def log_trade(
                 "Timestamp",
                 "Type",
                 "Price",
-                "Quantity"
+                "Investment Amount",
+                "BTC Bought",
+                "PnL"
             ])
 
         writer.writerow([
             timestamp,
             trade_type,
             round(price,2),
-            round(quantity,6)
+            investment_amount,
+            btc_bought,
+            pnl
         ])

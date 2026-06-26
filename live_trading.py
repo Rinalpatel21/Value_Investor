@@ -1,13 +1,23 @@
+
+from portfolio_storage import (
+    load_portfolio,
+    save_portfolio
+)
+
+
+
 def run_live_agent():
 
-    print("LIVE BOT RUNNING")
+    portfolio = load_portfolio(10000)
 
-    # get latest BTC price
+    # market data
 
-    # calculate indicators
+    # indicators
 
-    # execute strategy
+    # DCA
 
-    # send telegram
+    # swing trades
 
-    # save trades
+    save_portfolio(portfolio)
+
+    print("Portfolio Saved")

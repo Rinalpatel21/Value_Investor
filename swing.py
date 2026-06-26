@@ -5,18 +5,19 @@ from telegram_bot import send_message
 
 
 def swing_entry_signal(row):
-    """Entry on strong momentum with quality filters"""
+    """Entry on strong momentum - STRICTLY RESTRICTED TO TRENDING MARKETS"""
+    
+    # NEW FILTER: If the market is chopping or panicking, do not swing trade
+    if "REGIME" in row and row["REGIME"] != "TRENDING":
+        return False
+
     if (
         row["RSI"] > 60
         and row["RSI"] < 75
-        and
-        row["MACD"] > 0
-        and
-        row["VOL_RATIO"] > 1.5
-        and
-        row["Close"] > row["EMA50"]
-        and
-        row["EMA50"] > row["SMA50"]
+        and row["MACD"] > 0
+        and row["VOL_RATIO"] > 1.5
+        and row["Close"] > row["EMA50"]
+        and row["EMA50"] > row["SMA50"]
     ):
         return True
 
@@ -29,34 +30,17 @@ def open_swing_trade(
         atr,
         current_time):
 
-    #################################
-    # Risk 0.5% of cash (reduced for better Sharpe)
-    #################################
-
-    risk_amount = portfolio.cash * 0.005
-
-    #################################
-    # Stop distance (tighter for better risk/reward)
-    #################################
-
-   
     config = load_config()
-
+    
     stop_distance = config["atr_stop_multiplier"] * atr
 
-    quantity = risk_amount / stop_distance
+    quantity=portfolio.cash/current_price
 
     cost = quantity * current_price
 
-    #################################
-    # Don't exceed available cash
-    #################################
-
     if cost > portfolio.cash:
-
-        quantity = portfolio.cash / current_price
-
-        cost = quantity * current_price
+        print("Not enough cash to open swing trade.")
+        return
 
     trade = {
 
@@ -65,7 +49,7 @@ def open_swing_trade(
         "stop": current_price - stop_distance,
 
         "partial_target": current_price + 3 * atr,
-
+        
         "target": current_price + config["take_profit_multiplier"] * atr,
 
         "final_target": current_price + (config["final_target_multiplier"] * atr),
@@ -74,7 +58,7 @@ def open_swing_trade(
 
         "partial_taken": False
 
-    }
+              }
 
     portfolio.active_trades.append(trade)
 
@@ -92,12 +76,14 @@ def open_swing_trade(
 
     )
 
-    send_message(f"SWING BUY\nPrice={current_price:.2f}\nQty={quantity:.5f}")
+    if config.get("environment") != "BACKTEST":
+        send_message(f"SWING BUY\nPrice={current_price:.2f}\nQty={quantity:.5f}")
 
     from trade_logger import log_trade
 
-    log_trade("SWING_BUY",
+    log_trade(current_time,
+              "SWING_BUY",
               current_price,
-              quantity,
-              0,
-              current_time)
+              round(cost, 2),
+              round(quantity, 5),
+              "BTC Bought")

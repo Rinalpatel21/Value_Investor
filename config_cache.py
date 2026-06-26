@@ -36,9 +36,9 @@ def load_cache():
 
             "dca_pct": 3,
 
-            "atr_multiplier": 2,
+            "atr_multiplier": 3,
 
-            "stop_loss_multiplier": 2.5,
+            "stop_loss_multiplier": 3,
 
             "take_profit_multiplier": 5,
 
