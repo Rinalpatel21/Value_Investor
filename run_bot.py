@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import schedule
 import time
 
@@ -16,8 +18,12 @@ schedule.every().monday.at(
 
 print("BTC Agent Started")
 
+run_live_agent()
+
 while True:
 
-    schedule.run_pending()
+        print(datetime.now())
 
-    time.sleep(60)
+        schedule.run_pending()
+
+        time.sleep(60)

@@ -1,5 +1,6 @@
 from telegram_bot import send_message
 from trade_logger import log_trade
+from order_executor import market_sell
 
 
 def manage_active_trades(
@@ -20,13 +21,12 @@ def manage_active_trades(
                 trade["entry"]
             ) * trade["quantity"]
 
-            portfolio.cash += (
-                current_price *
-                trade["quantity"]
-            )
-
-            portfolio.btc_swing -= trade["quantity"]
-
+            
+            market_sell(portfolio,
+                       trade["quantity"],
+                       current_price,
+                       current_time)
+            
             portfolio.closed_trades.append(
                 {
                     "entry": trade["entry"],
@@ -58,12 +58,11 @@ def manage_active_trades(
                 trade["entry"]
             ) * trade["quantity"]
 
-            portfolio.cash += (
-                current_price *
-                trade["quantity"]
-            )
-
-            portfolio.btc_swing -= trade["quantity"]
+            market_sell(portfolio,
+                       trade["quantity"],
+                       current_price,
+                       current_time)
+                  
 
             portfolio.closed_trades.append(
                 {

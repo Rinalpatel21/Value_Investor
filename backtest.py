@@ -8,11 +8,8 @@ from indicators import add_indicators
 from portfolio import Portfolio
 
 from dca import execute_dca_buy
-from dca_atr import (
-    atr_opportunity_buy,
-    dca_protective_sell
-    
-)
+
+from dca_sell import dca_protective_sell
 
 from regime import detect_market_regime
 from strategy import select_strategy
@@ -151,13 +148,10 @@ for i in range(0, len(df)):
              amount,
              current_time
                           )
+           
+    dca_protective_sell(
 
-
-        # ATR Opportunity Buy
-
-           atr_opportunity_buy(
-
-            portfolio,
+             portfolio,
 
             current_price,
 
@@ -165,20 +159,10 @@ for i in range(0, len(df)):
 
             atr
 
-        )
+        )      
 
 
-        # DCA Protective Sell
-
-           dca_protective_sell(
-
-            portfolio,
-
-            current_price,
-
-            atr
-
-        )
+        
 
 
     ####################################

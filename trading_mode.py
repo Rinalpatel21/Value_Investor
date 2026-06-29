@@ -1,0 +1,5 @@
+PAPER = "PAPER"
+
+LIVE = "LIVE"
+
+MODE = PAPER

@@ -8,18 +8,18 @@ def swing_entry_signal(row):
     """Entry on strong momentum - STRICTLY RESTRICTED TO TRENDING MARKETS"""
     
     # NEW FILTER: If the market is chopping or panicking, do not swing trade
-    if "REGIME" in row and row["REGIME"] != "TRENDING":
-        return False
+    #if "REGIME" in row and row["REGIME"] != "TRENDING":
+        #return False
 
     if (
-        row["RSI"] > 60
-        and row["RSI"] < 75
-        and row["MACD"] > 0
-        and row["VOL_RATIO"] > 1.5
-        and row["Close"] > row["EMA50"]
-        and row["EMA50"] > row["SMA50"]
+        #row["RSI"] > 60
+        #and row["RSI"] < 75
+        #and row["MACD"] > 0
+        row["VOL_RATIO"] > 1
+        #and row["Close"] > row["EMA50"]
+        #and row["EMA50"] > row["SMA50"]
     ):
-        return True
+         return True
 
     return False
 
@@ -76,8 +76,8 @@ def open_swing_trade(
 
     )
 
-    if config.get("environment") != "BACKTEST":
-        send_message(f"SWING BUY\nPrice={current_price:.2f}\nQty={quantity:.5f}")
+    
+    send_message(f"SWING BUY\nPrice={current_price:.2f}\nQty={quantity:.5f}")
 
     from trade_logger import log_trade
 
