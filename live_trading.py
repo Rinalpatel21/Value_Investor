@@ -23,7 +23,7 @@ from indicators import add_indicators
 
 from paper_orders import save_order
 
-from order_executor import market_buy
+from order_executor import market_buy, market_sell
 
 
 from regime import detect_market_regime
@@ -43,6 +43,7 @@ from risk_manager import portfolio_stop
 from config_loader import load_config
 
 from portfolio_history import save_portfolio_history
+from tool_dispatcher import execute_tool
 
 
 def run_live_agent():
@@ -69,6 +70,8 @@ def run_live_agent():
       row = df.iloc[-1]
 
       current_price = row["Close"]
+
+      current_time = row.name
 
       print(f"Cash: {portfolio.cash:.2f}")
       print(f"DCA BTC: {portfolio.btc_dca:.6f}")
@@ -98,8 +101,61 @@ def run_live_agent():
 # Detect regime
       regime = detect_market_regime(row)
 
-    # Select strategy
       strategy = select_strategy(regime)
+
+      market_state = {"price": current_price,
+
+                     "RSI": row["RSI"],
+
+                      "ATR": row["ATR"],
+
+                      "SMA50": row["SMA50"],
+
+                      "EMA50": row["EMA50"],
+
+                      "regime": regime,
+
+                     "strategy": strategy,
+
+                     "cash": portfolio.cash,
+
+                     "btc": portfolio.total_btc(),
+
+                     "average_cost": portfolio.dca_avg_cost}
+      
+      from llm_agent import get_ai_decision
+
+      decision = get_ai_decision(market_state)
+
+
+
+      execute_tool(decision,
+                  portfolio,
+                 current_price,
+                 current_time)
+
+
+      summary = decision["explanation"]["summary"]
+
+      confidence = decision["analysis"]["confidence"]
+
+      tool = decision["decision"]["tool"]
+
+      send_message(
+
+                    f"""
+                    AI Decision
+
+                    Action: {tool}
+
+                    Confidence: {confidence}
+
+                    Reason:
+
+                    {summary}
+                    """)
+
+
 
       print(f"Price: {row['Close']:.2f}")
       print(f"Regime: {regime}")
@@ -178,14 +234,15 @@ def run_live_agent():
                      open_swing_trade(
                                      portfolio,
                                      row["Close"],
-                                     row["ATR"]
+                                     row["ATR"], 
+                                     current_time
                                )
                      save_portfolio(portfolio)
 
       manage_active_trades(
                          portfolio,
                          row["Close"],
-                         row.name,
+                         current_time,
                          row["ATR"]
                         )
       save_portfolio(portfolio)

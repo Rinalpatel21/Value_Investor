@@ -1,33 +1,20 @@
 import csv
 import os
 
-
 def save_portfolio_history(
-
     current_time,
-
     portfolio_value,
-
-    current_price,
-
+    btc_price,
     cash,
-
-    btc
-
+    btc_holdings
 ):
 
-    file_exists = os.path.exists(
-        "portfolio_history.csv"
-    )
+    file_exists = os.path.exists("portfolio_history.csv")
 
     with open(
-
         "portfolio_history.csv",
-
         "a",
-
         newline=""
-
     ) as f:
 
         writer = csv.writer(f)
@@ -35,29 +22,17 @@ def save_portfolio_history(
         if not file_exists:
 
             writer.writerow([
-
                 "Time",
-
                 "Portfolio Value",
-
                 "BTC Price",
-
                 "Cash",
-
                 "BTC Holdings"
-
             ])
 
         writer.writerow([
-
             current_time,
-
             portfolio_value,
-
-            current_price,
-
+            btc_price,
             cash,
-
-            btc
-
+            btc_holdings
         ])
