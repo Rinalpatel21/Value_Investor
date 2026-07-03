@@ -103,36 +103,56 @@ def run_live_agent():
 
       strategy = select_strategy(regime)
 
-      market_state = {"price": current_price,
+      portfolio_value = (
+          portfolio.cash +
+          portfolio.total_btc() * current_price
+      )
 
-                     "RSI": row["RSI"],
+      max_buy_amount = min(
+          portfolio.cash,
+          portfolio_value * 0.10,
+          500
+      )
 
-                      "ATR": row["ATR"],
+      max_sell_quantity = min(
+          portfolio.total_btc(),
+          portfolio.total_btc() * 0.25
+      )
 
-                      "SMA50": row["SMA50"],
+      market_state = {"price": float(current_price),
 
-                      "EMA50": row["EMA50"],
+                     "RSI": float(row["RSI"]),
+
+                      "ATR": float(row["ATR"]),
+
+                      "SMA50": float(row["SMA50"]),
+
+                      "EMA50": float(row["EMA50"]),
 
                       "regime": regime,
 
                      "strategy": strategy,
 
-                     "cash": portfolio.cash,
+                     "cash": float(portfolio.cash),
 
-                     "btc": portfolio.total_btc(),
+                     "btc": float(portfolio.total_btc()),
 
-                     "average_cost": portfolio.dca_avg_cost}
+                     "average_cost": float(portfolio.dca_avg_cost),
+
+                     "portfolio_value": float(portfolio_value),
+
+                     "max_buy_amount": float(max_buy_amount),
+
+                     "max_sell_quantity": float(max_sell_quantity)}
       
       from llm_agent import get_ai_decision
 
-      decision = get_ai_decision(market_state)
+      from agent import run_trading_agent
 
+      market_state["portfolio"] = portfolio
+      market_state["current_time"] = current_time
 
-
-      execute_tool(decision,
-                  portfolio,
-                 current_price,
-                 current_time)
+      decision, result = run_trading_agent(market_state)
 
 
       summary = decision["explanation"]["summary"]
@@ -149,6 +169,8 @@ def run_live_agent():
                     Action: {tool}
 
                     Confidence: {confidence}
+
+                    Execution: {result}
 
                     Reason:
 

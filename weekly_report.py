@@ -3,32 +3,50 @@ import pandas as pd
 
 def generate_report():
 
-    df = pd.read_csv(
-        "trade_log.csv"
-    )
+    try:
+        df = pd.read_csv("paper_orders.csv")
+    except FileNotFoundError:
+        return """
+BTC Trading Agent Weekly Report
+
+No buy or sell history found yet.
+"""
 
     total_trades = len(df)
 
-    wins = len(
-        df[df["PnL"] > 0]
-    )
+    if total_trades == 0:
+        return """
+BTC Trading Agent Weekly Report
 
-    total_profit = df["PnL"].sum()
+No buy or sell orders recorded this week.
+"""
 
-    win_rate = (
-        wins / total_trades * 100
-        if total_trades > 0
-        else 0
-    )
+    buys = df[df["Side"] == "BUY"]
+    sells = df[df["Side"] == "SELL"]
+
+    buy_total = buys["Amount"].sum()
+    sell_total = (sells["Price"] * sells["Amount"]).sum()
+
+    latest = df.iloc[-1]
 
     report = f"""
 BTC Trading Agent Weekly Report
 
-Trades: {total_trades}
+Total Orders: {total_trades}
 
-Win Rate: {win_rate:.2f}%
+Buy Orders: {len(buys)}
 
-Profit: ${total_profit:.2f}
+Sell Orders: {len(sells)}
+
+Total Buy Amount: ${buy_total:.2f}
+
+Estimated Sell Value: ${sell_total:.2f}
+
+Latest Order: {latest["Side"]} at ${latest["Price"]:.2f}
+
+Cash After Latest Order: ${latest["Cash"]:.2f}
+
+BTC After Latest Order: {latest["BTC"]:.6f}
 """
 
     return report

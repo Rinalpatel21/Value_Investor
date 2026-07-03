@@ -1,29 +1,21 @@
-
-from llm_agent import ask_agent
+from agent import run_agent
 
 print("="*50)
 
 print("BTC AI Assistant")
 
-print("Type exit to quit")
-
 print("="*50)
-
 
 while True:
 
-    prompt = input("\nYou: ")
+    question = input("\nYou: ")
 
-    if prompt.lower() == "exit":
+    if question == "exit":
 
         break
 
-    response = ask_agent(prompt)
+    answer = run_agent(question)
 
-    print()
+    print("\nAI:")
 
-    print("AI:")
-
-    print(response)
-
-    # python chat.py
+    print(answer)

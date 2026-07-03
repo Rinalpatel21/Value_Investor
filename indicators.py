@@ -1,7 +1,7 @@
 from ta.volatility import AverageTrueRange
 from ta.momentum import RSIIndicator
 from ta.trend import MACD
-import pandas as pd
+
 
 
 def add_indicators(df):

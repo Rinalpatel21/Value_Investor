@@ -1,8 +1,5 @@
 from trade_logger import log_trade
 from telegram_bot import send_message
-import trade_logger
-
-
 from trade_logger import log_trade
 from telegram_bot import send_message
 
