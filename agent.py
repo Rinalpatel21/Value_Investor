@@ -12,76 +12,60 @@ from conversation import (
 from tool_dispatcher import execute_tool
 
 from logs import log_event
-
+from decision_engine import make_decision
+from llm_agent import _parse_json_response
 
 def run_agent(user_prompt):
 
     clear_messages()
 
-    add_message("system", user_prompt)
+    add_message("user", user_prompt)
 
     while True:
 
-        response = ask_agent()
+       
+       response = ask_agent()
+       add_message("assistant", response)
 
-        print(response)
+       try:
+          data = _parse_json_response(response)
 
-        add_message("assistant",
-                    json.dumps(
+       except json.JSONDecodeError:
+          print("LLM returned:")
+          print(response)
+          return response
+
+       if data.get("done"):
+
+          add_message("assistant", data["answer"])
+
+          return data["answer"]
+
+       try:
+          result = execute_tool(data)
+       except Exception as e:
+          return f"Tool execution failed: {e}"
+
+       log_event({"prompt": user_prompt,
+                  "tool": data,
+                 "result": json.loads(json.dumps(result, default=str))})
+       
+       add_message("tool",
+                   json.dumps(
         {
-            "tool_result": {
-                "tool": data["tool"],
-                "result": result
-            }
-        }
-    )
-)
-
-        try:
-
-            data = json.loads(response)
-
-        except:
-
-            return response
-
-        if data.get("done"):
-
-            return data["answer"]
-
-        result = execute_tool(data)
-
-        log_event({"prompt": user_prompt,
-
-                   "tool": data,
-
-                   "result": result})
-
-        print(result)
-
-        add_message(
-            "user",
-            f"Tool Result:\n{result}"
-        )
+            "tool": data["tool"],
+            "result": result
+        },
+        default=str )
+                   )
+    
 
 
-from llm_agent import get_ai_decision
+
 
 def run_trading_agent(market_state):
 
-    decision = get_ai_decision(market_state)
-
-    result = execute_tool(
-        decision,
-        portfolio=market_state["portfolio"],
-        price=market_state["price"],
-        current_time=market_state["current_time"]
+    return make_decision(
+        market_state,
+        execute=True
     )
-
-    log_event({ "market_state": market_state,
-
-                "decision": decision,
-
-                 "execution": result})
-
-    return decision, result

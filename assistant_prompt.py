@@ -24,11 +24,6 @@ Available tools are:
 
 get_portfolio
 get_recent_orders
-get_cash
-get_btc_balance
-get_market_state
-get_strategy
-get_regime
 get_performance
 get_market_summary
 market_buy
@@ -101,45 +96,9 @@ Return
     "answer": "Bitcoin is a decentralized digital currency..."
 }
 
-User:
-How much cash do I have?
-
-Return
-
-{
-    "tool":"get_cash"
-}
 
 
 
-User:
-Show my BTC holdings
-
-Return
-
-{
-    "tool":"get_btc_balance"
-}
-
-
-User:
-Show current market
-
-Return
-
-{
-    "tool":"get_market_state"
-}
-
-
-User:
-What strategy is active?
-
-Return
-
-{
-    "tool":"get_strategy"
-}
 
 
 User:
@@ -188,9 +147,7 @@ Return
     "amount":250
 }
 
-User:
-Sell 0.001 BTC
-
+User:What was my last trade?
 Return
 
 {
@@ -214,6 +171,34 @@ Return
 {
     "tool":"get_profit_loss"
 }
+
+User:
+Analyze my trading account
+
+Return
+
+{
+    "tool":"get_trading_context"
+}
+
+If the user asks about:
+
+• market
+• portfolio
+• strategy
+• account status
+• whether they should buy
+• whether they should sell
+
+Prefer
+
+{
+    "tool":"get_trading_context"
+}
+
+instead of requesting several smaller tools.
+
+
 
 
 """

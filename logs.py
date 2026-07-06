@@ -1,16 +1,15 @@
 import json
-from datetime import datetime
 
 
 def log_event(event):
 
-    event["timestamp"] = str(datetime.now())
+    with open("logs.jsonl", "a") as f:
 
-    with open(
-        "agent_log.jsonl",
-        "a"
-    ) as f:
-
-        f.write(json.dumps(event))
+        f.write(
+            json.dumps(
+                event,
+                default=str      # <- converts unsupported objects to strings
+            )
+        )
 
         f.write("\n")

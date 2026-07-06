@@ -1,341 +1,298 @@
-import time
-
-
-
-
-
-from dca import execute_dca_buy
-from portfolio_storage import load_portfolio
-from portfolio_storage import save_portfolio
-from portfolio import Portfolio
-
+from portfolio_storage import load_portfolio, save_portfolio
 from market_data import download_btc_data
 from indicators import add_indicators
 
 from regime import detect_market_regime
 from strategy import select_strategy
-
-from telegram_bot import send_message
-from config import load_config
-
-from market_data import download_btc_data
-from indicators import add_indicators
-
-from paper_orders import save_order
-
-from order_executor import market_buy, market_sell
-
-
-from regime import detect_market_regime
-from strategy import select_strategy
-
-from swing import (
-    swing_entry_signal,
-    open_swing_trade
-)
-
-from atr_sell import manage_active_trades
-
-from risk_manager import portfolio_stop
-
-
 
 from config_loader import load_config
 
+from decision_engine import make_decision
+
+
+from telegram_bot import send_message
+
 from portfolio_history import save_portfolio_history
-from tool_dispatcher import execute_tool
+from risk_manager import portfolio_stop
+
+from atr_sell import manage_active_trades
+from swing import swing_entry_signal, open_swing_trade
+
+from order_executor import market_buy
+
+
+def build_market_state(portfolio, row):
+
+    
+
+    price = float(row["Close"])
+
+    regime = detect_market_regime(row)
+    strategy = select_strategy(regime)
+
+    portfolio_value = (
+        portfolio.cash +
+        portfolio.total_btc() * price
+    )
+
+    max_buy_amount = min(
+        portfolio.cash,
+        portfolio_value * 0.10,
+        500
+    )
+
+    max_sell_quantity = min(
+        portfolio.total_btc(),
+        portfolio.total_btc() * 0.25
+    )
+
+    return {
+        "price": price,
+        "RSI": float(row["RSI"]),
+        "ATR": float(row["ATR"]),
+        "EMA50": float(row["EMA50"]),
+        "SMA50": float(row["SMA50"]),
+
+        "regime": regime,
+        "strategy": strategy,
+
+        "cash": portfolio.cash,
+        "btc": portfolio.total_btc(),
+        "average_cost": portfolio.dca_avg_cost,
+
+        "portfolio_value": portfolio_value,
+
+        "max_buy_amount": max_buy_amount,
+        "max_sell_quantity": max_sell_quantity,
+        "has_cash": portfolio.cash > 10,
+        "has_btc": portfolio.total_btc() > 0,
+        "position_value": portfolio.total_btc() * price,
+        "allocation_pct": (portfolio.total_btc() * price) / (portfolio.cash + 1e-9),
+        "trend_strength": abs(row["EMA50"] - row["SMA50"]),
+        "momentum": row["RSI"] - 50
+        
+    }
 
 
 def run_live_agent():
-    
 
     try:
 
-      print("=" * 50)
-      print("Starting new trading cycle...")
+        print("=" * 50)
+        print("Starting new trading cycle...")
 
-    # Load saved portfolio
-      portfolio = load_portfolio(10000)
+        portfolio = load_portfolio(10000)
 
-    # Load latest config
-      config = load_config()
+        config = load_config()
 
-    # Download market data
-      df = download_btc_data()
+        df = download_btc_data()
+        df = add_indicators(df)
 
-    # Calculate indicators
-      df = add_indicators(df)
+        row = df.iloc[-1]
 
-    # Latest candle
-      row = df.iloc[-1]
+        current_price = float(row["Close"])
+        current_time = row.name
 
-      current_price = row["Close"]
+        print(f"Cash: {portfolio.cash:.2f}")
+        print(f"DCA BTC: {portfolio.btc_dca:.6f}")
+        print(f"Average Cost: {portfolio.dca_avg_cost:.2f}")
 
-      current_time = row.name
+        ####################################
+        # Initial Buy
+        ####################################
 
-      print(f"Cash: {portfolio.cash:.2f}")
-      print(f"DCA BTC: {portfolio.btc_dca:.6f}")
-      print(f"Average Cost: {portfolio.dca_avg_cost:.2f}")
+        if portfolio.last_dca_buy_price is None:
 
-####################################
-# First DCA Buy
-####################################
+            market_buy(
+                portfolio,
+                current_price,
+                500,
+                current_time
+            )
 
-      if portfolio.last_dca_buy_price is None:
+            save_portfolio(portfolio)
 
-          market_buy(
-                      portfolio,
-                      current_price,
-                      500,
-                      row.name
-                     )
+            send_message("Initial DCA Buy Executed")
 
-          save_portfolio(portfolio)
+        ####################################
+        # LLM Decision
+        ####################################
 
-          print("Initial DCA Buy Executed")
+        market_state = build_market_state(
+            portfolio,
+            row
+        )
 
-          send_message("Initial DCA Buy Executed")
+        decision, result = make_decision(market_state,
+                                        portfolio=portfolio,
+                                        current_time=current_time,
+                                        execute=True)
 
-    
+        save_portfolio(portfolio)
 
-# Detect regime
-      regime = detect_market_regime(row)
+        tool = decision["decision"]["tool"]
+        confidence = decision["analysis"]["confidence"]
+        summary = decision["explanation"]["summary"]
 
-      strategy = select_strategy(regime)
+        send_message(
+            f"""
+AI Decision
 
-      portfolio_value = (
-          portfolio.cash +
-          portfolio.total_btc() * current_price
-      )
+Action: {tool}
 
-      max_buy_amount = min(
-          portfolio.cash,
-          portfolio_value * 0.10,
-          500
-      )
+Confidence: {confidence:.2f}
 
-      max_sell_quantity = min(
-          portfolio.total_btc(),
-          portfolio.total_btc() * 0.25
-      )
+Execution:
+{result}
 
-      market_state = {"price": float(current_price),
+Reason:
+{summary}
+"""
+        )
 
-                     "RSI": float(row["RSI"]),
+        ####################################
+        # Existing Strategy Logic
+        ####################################
 
-                      "ATR": float(row["ATR"]),
+        regime = detect_market_regime(row)
+        strategy = select_strategy(regime)
 
-                      "SMA50": float(row["SMA50"]),
+        if strategy in ["HYBRID", "DCA_ONLY"]:
 
-                      "EMA50": float(row["EMA50"]),
+            if portfolio.dca_avg_cost > 0:
 
-                      "regime": regime,
+                drop_pct = (
+                    portfolio.dca_avg_cost -
+                    current_price
+                ) / portfolio.dca_avg_cost
 
-                     "strategy": strategy,
+            else:
+                drop_pct = 0
 
-                     "cash": float(portfolio.cash),
+            if drop_pct >= config["drop_3"]:
+                amount = config["dca_buy_3"]
 
-                     "btc": float(portfolio.total_btc()),
+            elif drop_pct >= config["drop_2"]:
+                amount = config["dca_buy_2"]
 
-                     "average_cost": float(portfolio.dca_avg_cost),
+            elif drop_pct >= config["drop_1"]:
+                amount = config["dca_buy_1"]
 
-                     "portfolio_value": float(portfolio_value),
+            else:
+                amount = 0
 
-                     "max_buy_amount": float(max_buy_amount),
+            if amount > 0:
 
-                     "max_sell_quantity": float(max_sell_quantity)}
-      
-      from llm_agent import get_ai_decision
+                market_buy(
+                    portfolio,
+                    current_price,
+                    amount,
+                    current_time
+                )
 
-      from agent import run_trading_agent
+                save_portfolio(portfolio)
 
-      market_state["portfolio"] = portfolio
-      market_state["current_time"] = current_time
+        ####################################
+        # Weekly DCA
+        ####################################
 
-      decision, result = run_trading_agent(market_state)
+        if portfolio.last_dca_buy_time is not None:
 
+            days_since_buy = (
+                current_time -
+                portfolio.last_dca_buy_time
+            ).days
 
-      summary = decision["explanation"]["summary"]
+            if days_since_buy >= 7:
 
-      confidence = decision["analysis"]["confidence"]
+                market_buy(
+                    portfolio,
+                    current_price,
+                    500,
+                    current_time
+                )
 
-      tool = decision["decision"]["tool"]
+                save_portfolio(portfolio)
 
-      send_message(
+        ####################################
+        # Swing Trades
+        ####################################
 
-                    f"""
-                    AI Decision
+        if strategy == "HYBRID":
 
-                    Action: {tool}
+            if len(portfolio.active_trades) == 0:
 
-                    Confidence: {confidence}
+                if swing_entry_signal(row):
 
-                    Execution: {result}
+                    open_swing_trade(
+                        portfolio,
+                        current_price,
+                        row["ATR"],
+                        current_time
+                    )
 
-                    Reason:
+                    save_portfolio(portfolio)
 
-                    {summary}
-                    """)
+        manage_active_trades(
+            portfolio,
+            current_price,
+            current_time,
+            row["ATR"]
+        )
 
+        save_portfolio(portfolio)
 
+        ####################################
+        # Risk Management
+        ####################################
 
-      print(f"Price: {row['Close']:.2f}")
-      print(f"Regime: {regime}")
-      print(f"Strategy: {strategy}")
+        portfolio_value = (
+            portfolio.cash +
+            portfolio.total_btc() * current_price
+        )
 
-    # Execute DCA / Swing logic here
+        if portfolio_stop(
+            portfolio_value,
+            config["initial_capital"]
+        ):
 
-       
-      if strategy in ["HYBRID", "DCA_ONLY"]:
+            print("PORTFOLIO STOP TRIGGERED")
 
-         if portfolio.dca_avg_cost > 0:
+        ####################################
+        # Save History
+        ####################################
 
-           drop_pct = (
-              portfolio.dca_avg_cost -
-              row["Close"]
-              ) / portfolio.dca_avg_cost
+        save_portfolio_history(
+            current_time,
+            portfolio_value,
+            current_price,
+            portfolio.cash,
+            portfolio.total_btc()
+        )
 
-         else:
+        ####################################
+        # Status
+        ####################################
 
-            drop_pct = 0
+        send_message(
+            f"""
+BTC Agent Status
 
-         if drop_pct >= config["drop_3"]:
+Price: ${current_price:.2f}
 
-             amount = config["dca_buy_3"]
+Regime: {regime}
 
-         elif drop_pct >= config["drop_2"]:
+Strategy: {strategy}
 
-              amount = config["dca_buy_2"]
+Portfolio: ${portfolio_value:.2f}
 
-         elif drop_pct >= config["drop_1"]:
+Cash: ${portfolio.cash:.2f}
 
-             amount = config["dca_buy_1"]
+BTC: {portfolio.total_btc():.6f}
+"""
+        )
 
-         else:
-
-             amount = 0
-
-         if amount > 0:
-
-           market_buy(portfolio,
-                      row["Close"],
-                      amount,
-                      row.name)
-           
-           print(f"Drop % = {drop_pct:.4f}")
-           print(f"Buy Amount = {amount}")
-
-    
-####################################
-# Weekly DCA
-####################################
-
-      current_time = row.name
-
-      if portfolio.last_dca_buy_time is not None:
-
-           days_since_buy = (
-           current_time -
-           portfolio.last_dca_buy_time).days
-
-           if days_since_buy >= 7:
-
-              market_buy(portfolio,
-                         current_price,
-                         500,
-                         current_time)
-
-              save_portfolio(portfolio)
-         
-
-      if strategy == "HYBRID":
-
-              if len(portfolio.active_trades) == 0:
-
-                 if swing_entry_signal(row):
-                     open_swing_trade(
-                                     portfolio,
-                                     row["Close"],
-                                     row["ATR"], 
-                                     current_time
-                               )
-                     save_portfolio(portfolio)
-
-      manage_active_trades(
-                         portfolio,
-                         row["Close"],
-                         current_time,
-                         row["ATR"]
-                        )
-      save_portfolio(portfolio)
-
-      initial_capital = config["initial_capital"]
-
-      current_time = row.name
-
-      value = (
-
-          portfolio.cash
-
-          +
-
-          portfolio.total_btc() * current_price
-
-      )
-
-    
-
-
-      if portfolio_stop(
-
-              value,
-
-              initial_capital):
-
-          print()
-
-          print("PORTFOLIO STOP TRIGGERED")
-
-         
-
-# Save updated portfolio
-      save_portfolio(portfolio)
-
-      portfolio_value = (portfolio.cash +
-      portfolio.total_btc() * current_price)
-
-      save_portfolio_history(
-
-      current_time,
-
-      portfolio_value,
-
-      current_price,
-
-      portfolio.cash,
-
-      portfolio.total_btc()
-
-                          )
-
-      status = f"""BTC Agent Status
-
-             Price: ${current_price:.2f}
-
-             Regime: {regime}
-
-             Strategy: {strategy}
-
-             Portfolio: ${portfolio_value:.2f}
-
-             Cash: ${portfolio.cash:.2f}
-
-             BTC: {portfolio.total_btc():.6f}
-                 """
-
-      send_message(status)
-
-      print("Trading cycle complete.")
+        print("Trading cycle complete.")
 
     except Exception as e:
 

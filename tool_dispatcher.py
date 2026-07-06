@@ -1,11 +1,12 @@
 from market_data import download_btc_data
 from order_executor import market_buy, market_sell
 from portfolio_storage import load_portfolio, save_portfolio
-from tools import get_last_trade, get_performance, get_portfolio, get_recent_orders, get_last_trade, get_profit_loss
-from tools import get_market_state, get_cash, get_strategy, get_regime, get_btc_balance, get_performance, get_market_summary
+from tools import get_last_trade, get_performance, get_portfolio, get_recent_orders, get_last_trade, get_profit_loss, get_trading_context
+from tools import get_performance, get_market_summary
 from indicators import add_indicators
 from regime import detect_market_regime
 from strategy import select_strategy
+
 
 TOOLS = {
 
@@ -19,23 +20,18 @@ TOOLS = {
 
          "get_recent_orders": get_recent_orders,
 
-         "get_market_state": get_market_state,
-
-         "get_cash": get_cash,
-
-         "get_strategy": get_strategy,
-
-         "get_regime": get_regime,
-
-         "get_btc_balance": get_btc_balance,
-
          "get_performance": get_performance,
 
          "get_market_summary": get_market_summary,
 
          "get_last_trade": get_last_trade,
 
-         "get_profit_loss": get_profit_loss
+         "get_profit_loss": get_profit_loss,
+
+         "get_trading_context": get_trading_context,
+
+         
+
         
         
 
@@ -90,6 +86,9 @@ def execute_tool(tool_request, **context):
         amount = float(tool_request.get("amount", 500))
         portfolio = context["portfolio"]
 
+        if portfolio.cash <= 0:
+           return {"status": "rejected", "reason": "No cash available"}
+
         if amount <= 0:
             return {"status": "rejected", "reason": "Buy amount must be positive."}
 
@@ -106,6 +105,8 @@ def execute_tool(tool_request, **context):
         save_portfolio(portfolio)
 
         return result
+    
+    
 
     elif tool_name == "market_sell":
 
