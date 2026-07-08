@@ -14,6 +14,7 @@ from tool_dispatcher import execute_tool
 from logs import log_event
 from decision_engine import make_decision
 from llm_agent import _parse_json_response
+from guardrails import is_off_topic
 
 def run_agent(user_prompt):
 
@@ -21,6 +22,19 @@ def run_agent(user_prompt):
 
     add_message("user", user_prompt)
 
+    if is_off_topic(user_prompt):
+
+       return """I'm a Bitcoin trading assistant.
+
+                I can only help with:
+               • Portfolio
+               • BTC trades
+               • Profit & Loss
+               • Market analysis
+               • Technical indicators
+               • Trading strategies
+               • Orders
+               • Risk management"""
     while True:
 
        
@@ -50,14 +64,14 @@ def run_agent(user_prompt):
                   "tool": data,
                  "result": json.loads(json.dumps(result, default=str))})
        
-       add_message("tool",
-                   json.dumps(
-        {
-            "tool": data["tool"],
-            "result": result
-        },
-        default=str )
-                   )
+       add_message("user",
+            json.dumps(
+    {
+        "tool_result_for": data["tool"],
+        "result": result
+    },
+    default=str )
+            )
     
 
 

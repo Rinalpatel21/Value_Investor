@@ -1,16 +1,18 @@
 import os
 import json
 
-from openai import OpenAI
+from groq import Groq
 from assistant_prompt import ASSISTANT_PROMPT
 from prompt import SYSTEM_PROMPT
 from conversation import add_message
 from conversation import get_messages
 
-client = OpenAI(
-    base_url="https://router.huggingface.co/v1",
-    api_key=os.environ["HF_TOKEN"],
+client = Groq(
+    api_key=os.environ["GROQ_API_KEY"],
 )
+
+MODEL = "llama-3.3-70b-versatile"
+
 
 def _parse_json_response(content):
     cleaned = content.strip()
@@ -24,9 +26,7 @@ def _parse_json_response(content):
 def get_ai_decision(market_state):
 
     response = client.chat.completions.create(
-
-        model="deepseek-ai/DeepSeek-V3:novita",
-
+        model=MODEL,
         messages=[
             {
                 "role": "system",
@@ -38,8 +38,6 @@ def get_ai_decision(market_state):
             }
         ]
     )
-
-    
 
     decision = response.choices[0].message.content
 
@@ -59,25 +57,17 @@ def get_ai_decision(market_state):
 def ask_agent():
 
     messages = [
-
         {
-
-            "role":"system",
-
-            "content":ASSISTANT_PROMPT
-
+            "role": "system",
+            "content": ASSISTANT_PROMPT
         }
-
     ]
 
     messages.extend(get_messages())
 
     response = client.chat.completions.create(
-
-        model="deepseek-ai/DeepSeek-V3:novita",
-
+        model=MODEL,
         messages=messages
-
     )
 
     answer = response.choices[0].message.content
@@ -85,36 +75,27 @@ def ask_agent():
     return answer
 
 
-
 def explain_tool_result(user_question, tool_result):
     response = client.chat.completions.create(
-
-    model="deepseek-ai/DeepSeek-V3:novita",
-
-    messages=[
-
-        {
-            "role":"system",
-            "content":ASSISTANT_PROMPT
-        },
-
-        {
-            "role":"user",
-            "content":user_question
-        },
-
-        {
-            "role":"assistant",
-            "content":"I executed the requested tool."
-        },
-
-        {
-            "role":"user",
-            "content":f"Tool Result:\n{tool_result}\n\nExplain this to me."
-        }
-
-    ]
-
-)
+        model=MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": ASSISTANT_PROMPT
+            },
+            {
+                "role": "user",
+                "content": user_question
+            },
+            {
+                "role": "assistant",
+                "content": "I executed the requested tool."
+            },
+            {
+                "role": "user",
+                "content": f"Tool Result:\n{tool_result}\n\nExplain this to me."
+            }
+        ]
+    )
 
     return response.choices[0].message.content
