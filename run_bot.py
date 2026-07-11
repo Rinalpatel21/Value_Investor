@@ -4,7 +4,7 @@ import schedule
 import time
 
 from live_trading import run_live_agent
-from gmail_report import send_report
+from core.gmail_report import send_report
 
 schedule.every(30).minutes.do(
     run_live_agent

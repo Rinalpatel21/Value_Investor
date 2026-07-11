@@ -1,0 +1,7 @@
+log_trade(
+    "PAPER BUY",
+    price,
+    qty,
+    pnl,
+    time
+)
