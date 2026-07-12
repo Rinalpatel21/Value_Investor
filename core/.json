@@ -1,0 +1,13 @@
+
+{
+  "decision": {
+      "tool":"market_buy",
+      "amount":500
+  },
+  "analysis":{
+      "confidence":0.84
+  },
+  "explanation":{
+      "summary":"short explanation"
+  }
+}
