@@ -1,485 +1,615 @@
-# Autonomous Bitcoin Trading Agent
+#  AI-Powered Bitcoin Trading Agent
 
-An AI-powered Bitcoin trading system designed to operate with minimal human supervision and continuously adapt to changing market conditions. The system combines **Dollar-Cost Averaging (DCA)**, **ATR-based risk management**, **market regime detection**, and **dynamic strategy selection** to manage Bitcoin positions while protecting capital.
+**A hybrid AI + algorithmic trading system that combines LLM reasoning with rule-based quantitative strategies to analyze markets, manage trading portfolio, execute a live trading loop, send real-time notifications, and answer questions through a conversational assistant.**
 
----
-
-# Overview
-
-This project simulates a fully automated cryptocurrency trading agent capable of:
-
-- Running continuously (24/7)
-- Dynamically allocating capital
-- Accumulating Bitcoin using DCA
-- Managing active trades with ATR-based stops
-- Switching strategies based on market conditions
-- Providing portfolio-level risk protection
-- Sending trade notifications
-- Generating weekly reports
-- Supporting cloud deployment and Docker
+<p align="left">
+  <img src="https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?logo=streamlit&logoColor=white" />
+  <img src="https://img.shields.io/badge/LLM-Groq%20Llama%203.3%2070B-orange" />
+  <img src="https://img.shields.io/badge/Notifications-Telegram-26A5E4?logo=telegram&logoColor=white" />
+  <img src="https://img.shields.io/badge/Status-Active%20Development-brightgreen" />
+  <img src="https://img.shields.io/badge/License-Educational%20Use-lightgrey" />
+</p>
 
 ---
 
-# Features
+##  Table of Contents
 
-## Dollar Cost Averaging (DCA)
+- [Overview](#-overview)
+- [Features](#-features)
+- [Trading Strategies](#-hybrid-trading-strategies)
+- [Live Trading Loop](#-live-trading-loop)
+- [Telegram Notifications](#-telegram-notifications)
+- [AI Chat Assistant](#-ai-chat-assistant)
+- [Dashboard](#-dashboard)
+- [Architecture](#-project-architecture)
+- [Trading Workflow](#-trading-workflow)
+- [Project Structure](#-project-structure)
+- [Tech Stack](#-tech-stack)
+- [Getting Started](#-getting-started)
+- [Running the App](#-running-the-app)
+- [Skills Demonstrated](#-skills-demonstrated)
+- [Images](#-Images)
 
-Long-term accumulation strategy:
-
-- Initial buy
-- Buy additional BTC when price drops
-- Adaptive position sizing:
-
-| Price Drop | Buy Amount |
-|------------|-----------|
-| 3% | $500 |
-| 6% | $700 |
-| 9% | $1000 |
-
-### ATR Opportunistic DCA
-
-When price falls sharply relative to volatility:
-
-```
-Price Drop > 2 × ATR
-```
-
-Additional BTC is accumulated.
 
 ---
 
-## ATR Protective Sell
+##  Overview
 
-Protects DCA holdings during severe drawdowns.
+This project is a complete, end-to-end **AI-assisted algorithmic trading system** for Bitcoin, built to demonstrate how large language models can be integrated responsibly alongside deterministic, risk-managed trading logic rather than being given free rein over real capital.
 
-Rule:
+The system combines:
 
-```
-Protection Level =
-Average Cost − 3 × ATR
-```
+- Quantitative trading strategies (DCA, Swing Trading, ATR-based exits)
+- LLM-based market reasoning and decision explanation (Groq / Llama 3.3 70B)
+- A **live trading loop** that runs on a schedule, evaluates the market, and acts autonomously within configured risk limits
+- Portfolio and risk management
+- Real-time **Telegram notifications** for every decision and status update
+- A live Streamlit dashboard for performance monitoring
+- A conversational AI assistant for querying portfolio and trade data
+- A trading execution engine with full trade logging
 
-Action:
-
-```
-Sell 20% of DCA holdings
-```
-
-Cooldown logic prevents repeated selling while price remains below the threshold.
+Unlike a typical "black box" trading bot, this system lets the LLM **analyze and recommend**, while deterministic guardrails and risk rules retain final control over execution — a pattern closer to how AI is used responsibly in real trading and finance environments.
 
 ---
 
-## Swing Trading Engine
+##  Features
 
-Short-term trades are opened only when market conditions support them.
+### AI Trading Decision Engine
 
-### Entry Conditions
+Uses an LLM (Groq — Llama 3.3 70B) to:
 
-- RSI > 60
-- MACD > 0
-- Volume above average
-- Price > EMA50
-- EMA50 > SMA50
-
----
-
-## ATR Stop Loss
-
-Dynamic volatility-based stop:
-
-```
-Stop = Entry − 2 × ATR
-```
+- Analyze current market conditions (price, RSI, ATR, EMA50, SMA50, trend strength, momentum)
+- Evaluate live portfolio status (cash, BTC held, average cost, allocation %)
+- Recommend Buy / Sell / Hold decisions, constrained to a maximum buy/sell size derived from portfolio risk limits
+- Return a structured decision with a **confidence score**
+- Explain every trading decision in plain English
+- Answer trading-related questions conversationally
 
 ---
 
-## Profit Targets
+##  Hybrid Trading Strategies
 
-### Target 1
+###  Dollar Cost Averaging (DCA)
 
-```
-Entry + 3 × ATR
-```
+Automatically buys Bitcoin when:
 
-### Final Target
+- The portfolio has never made an initial buy (auto-triggers a starting DCA buy)
+- A weekly DCA schedule triggers (7+ days since the last buy)
+- Price drops below one of several configurable drawdown thresholds, each with its own buy size (tiered dip-buying)
 
-```
-Entry + 5 × ATR
-```
+Supports:
 
----
-
-## Trailing Stop
-
-Once price moves in favor:
-
-```
-Stop = max(
-    previous_stop,
-    current_price - 1.5 × ATR
-)
-```
-
-This locks profits while allowing trends to continue.
+- Dynamic buy sizing based on how far price has dropped from average cost
+- Running average cost calculation
+- Cost basis tracking over time
 
 ---
 
-# Market Regime Detection
+###  Swing Trading
 
-The agent classifies markets into:
+Detects short-term trading opportunities using a combination of technical indicators:
 
-### TRENDING
-
-Conditions:
-
-- MACD > 0
-- Price > EMA50
-
-### RANGING
-
-Neutral market conditions.
-
-### PANIC
-
-Oversold conditions:
-
-```
-RSI < 30
-```
-
----
-
-# Strategy Selection
-
-| Regime | Strategy |
-|---------|----------|
-| TRENDING | HYBRID |
-| RANGING | DCA_ONLY |
-| PANIC | DCA_ONLY |
-
----
-
-# Portfolio Safety Layer
-
-Global protection against catastrophic losses.
-
-Rule:
-
-```
-Portfolio Drawdown ≥ 25%
-```
-
-Action:
-
-```
-Pause Trading
-```
-
----
-
-# Performance Metrics
-
-Backtesting evaluates:
-
-### Sharpe Ratio
-
-Risk-adjusted returns.
-
-### Maximum Drawdown
-
-Largest portfolio decline.
-
-### Win Rate
-
-Percentage of profitable trades.
-
-### Portfolio Value
-
-Final account balance.
-
----
-
-# Technical Indicators
-
-Feature engineering includes:
-
-- ATR
-- RSI
-- MACD
-- SMA50
-- EMA50
-- Volume Ratio
-
----
-
-# Data Sources
-
-Supported market data providers:
-
-- Yahoo Finance (yfinance)
-- Binance API
-- Coinbase API
-- CoinMarketCap API
-- Investing.com
-
-Current implementation uses:
-
-```python
-yfinance
-```
-
-with:
-
-```
-BTC-USD
-30-minute candles
-```
-
----
-
-# Project Architecture
-
-```
-Configuration Manager
-        ↓
-State Manager
-        ↓
-Market Data Engine
-        ↓
-Feature Engineering
-        ↓
-Market Regime Detection
-        ↓
-Strategy Selector
-        ↓
-DCA Engine
-        ↓
-ATR Opportunity Buy
-        ↓
-Swing Trade Entry
-        ↓
-ATR Stop Loss
-        ↓
-Trade Management
-        ↓
-Portfolio Risk Layer
-        ↓
-Performance Metrics
-        ↓
-Telegram Alerts
-        ↓
-Weekly Gmail Reports
-```
-
----
-
-# Project Structure
-
-```
-trading-agent/
-
-│
-├── market_data.py
-├── indicators.py
-├── portfolio.py
-├── dca.py
-├── dca_atr.py
-├── swing.py
-├── atr_sell.py
-├── regime.py
-├── strategy.py
-├── risk_manager.py
-├── performance.py
-├── config.py
-├── test.py
-│
-├── config.json
-├── requirements.txt
-├── .env
-├── README.md
-```
-
----
-
-# Technologies Used
-
-## Python
-
-- Pandas
-- NumPy
-- yfinance
-- ta
-- datetime
-
-## Machine Learning / AI
-
-- LLM-assisted strategy selection
-- Feature engineering
+- RSI (Relative Strength Index)
+- EMA (Exponential Moving Average)
+- SMA (Simple Moving Average)
+- ATR (Average True Range)
 - Market regime detection
 
-## Trading Concepts
+Features:
 
-- Dollar Cost Averaging
-- ATR-based stops
-- Volatility analysis
-- Portfolio risk management
-
----
-
-# Future Improvements
-
-## LLM Module
-
-Use GPT models to:
-
-- Select strategies dynamically
-- Adjust DCA thresholds
-- Generate market commentary
-- Recommend allocation changes
+- Entry signal generation
+- Only opens a new swing trade when no active trade already exists
+- Active open-trade management on every cycle
 
 ---
 
-## Notifications
+###  ATR Exit Strategy
 
-### Telegram Bot
+Uses Average True Range (volatility) to:
 
-Trade alerts:
-
-```
-DCA BUY
-ATR BUY
-SWING BUY
-STOP LOSS
-TAKE PROFIT
-```
+- Protect unrealized profits
+- Limit downside losses
+- Dynamically adjust exit points as volatility changes
+- Manage all currently active/open trades on every cycle
 
 ---
 
-## Weekly Gmail Report
+###  Portfolio Risk Management
 
-Every Monday at 9 AM:
+Continuously monitors:
 
+- Total portfolio value (cash + BTC holdings at current price)
+- Maximum drawdown vs. initial capital
+- Capital allocation across cash/BTC
+- Position sizing — every buy/sell is capped as a percentage of portfolio value, not just a fixed amount
+
+A **portfolio stop** is triggered and logged if the portfolio's drawdown exceeds the configured risk limit, halting further risk-taking.
+
+---
+
+##  Live Trading Loop
+
+The core of the system is `run_live_agent()` — a full autonomous trading cycle that runs on a schedule (e.g. via cron, Task Scheduler, or a hosted job runner). Each cycle:
+
+1. **Loads state** — current portfolio and strategy configuration
+2. **Pulls fresh market data** and computes technical indicators
+3. **Runs an initial DCA buy** if the portfolio has never traded before
+4. **Builds a full market state snapshot** — price, indicators, regime, strategy, portfolio metrics, and risk-adjusted max buy/sell limits
+5. **Asks the LLM decision engine** for a Buy / Sell / Hold recommendation with reasoning and a confidence score, and executes it
+6. **Applies tiered/weekly DCA rules** independently of the LLM, based on price drawdown from average cost
+7. **Manages swing trades** — opens new positions on valid signals, manages existing ones every cycle
+8. **Applies ATR-based exit management** to all active trades
+9. **Checks the portfolio stop** risk control and halts trading if drawdown limits are breached
+10. **Persists portfolio state and history** after every state-changing step
+11. **Sends Telegram notifications** for both the AI's decision and a full status summary
+12. Wraps the entire cycle in error handling so a single failed cycle doesn't crash the scheduler — it logs the error and waits for the next run
+
+---
+
+##  Telegram Notifications
+
+Every trading cycle sends real-time updates to Telegram, including:
+
+- **AI Decision alerts** — action taken, confidence score, execution result, and the AI's reasoning
+- **Initial DCA buy confirmations**
+- **Portfolio status summaries** — current price, market regime, active strategy, portfolio value, cash, and BTC held
+
+This keeps a human in the loop on every autonomous decision the system makes, without needing to actively watch the dashboard.
+
+---
+
+##  AI Chat Assistant
+
+An interactive assistant, scoped entirely to trading-related queries, with a guided sidebar and example-question prompts built directly into the UI so users know exactly what they can ask.
+
+**Sidebar help panel covers:**
+
+** Portfolio**
+- Show my portfolio
+- What is my portfolio value?
+- How much cash do I have?
+- How much BTC do I own?
+- What is my average buy price?
+
+** Market Analysis**
+- What is the BTC price?
+- What's the current market regime?
+- What strategy is active?
+- Explain today's market conditions
+
+** Trading Performance**
+- How much money have I made?
+- Show my trading performance
+- What is my total return?
+- Am I profitable?
+
+** Trade History**
+- Show recent trades
+- What was my last trade?
+- Show paper orders
+- When did I last buy Bitcoin?
+
+** AI Decisions**
+- Should I buy Bitcoin?
+- Should I sell Bitcoin?
+- Why did the AI recommend buying?
+- Explain today's recommendation
+- Analyze my trading account
+
+An in-chat **"💡 Example Questions" expander** also surfaces sample prompts directly above the chat input, so first-time users aren't staring at a blank box.
+
+The assistant is protected by **guardrails** that keep it strictly focused on cryptocurrency trading topics, politely declining anything out of scope (see [Guardrails](#-guardrails) below).
+
+---
+
+##  Dashboard
+
+A live Streamlit dashboard providing full visibility into portfolio and strategy performance:
+
+**Portfolio Snapshot**
 - Portfolio Value
+- Cash on hand
 - BTC Holdings
-- Trade History
+- Total Return %
+
+**Trade Statistics**
+- Total Trades
 - Win Rate
-- Sharpe Ratio
-- Drawdown
-- LLM Insights
+- Average Win / Average Loss
+- Profit Factor
+
+**Charts**
+- Portfolio growth over time
+- BTC price history
+- Portfolio allocation — Cash vs. BTC (pie chart)
+- Buy vs. Sell activity (bar chart)
+
+**Tables**
+- Portfolio snapshot (cash, BTC, average cost, current price)
+- Recent trade log (last 10 trades)
+- Full paper order history
+
+**Sidebar Status**
+- Live cash and BTC holdings shown persistently in the sidebar while browsing the dashboard
 
 ---
 
-## Configuration Manager
-
-Parameters loaded from:
-
-### Google Sheets
-
-Hourly refresh.
-
-Fallback:
+## Project Architecture
 
 ```
-config.json
-```
-
-Sensitive credentials stored in:
-
-```
-.env
-```
-
----
-
-## Deployment
-
-Designed for:
-
-- Docker
-- AWS
-- DigitalOcean
-- Linux VPS
-
-Continuous execution:
-
-```
-24/7 autonomous trading
-```
-
----
-
-# Example Workflow
-
-```
-START
- ↓
-Load Config
- ↓
-Load Portfolio State
- ↓
-Download BTC Data
- ↓
-Calculate Indicators
- ↓
-Detect Market Regime
- ↓
-Select Strategy
- ↓
-DCA Buy Check
- ↓
-ATR Opportunity Buy
- ↓
-Swing Entry
- ↓
-Create ATR Stops
- ↓
-Manage Active Trades
- ↓
-Protect Portfolio
- ↓
-Calculate Performance
- ↓
-Send Alerts
- ↓
-Save State
- ↓
-Repeat Every 30 Minutes
+                           +---------------------------+
+                           |        Streamlit UI       |
+                           |---------------------------|
+                           | Dashboard   | AI Chat     |
+                           +-------------+-------------+
+                                         |
+                                         |
+                                         v
+                         +-------------------------------+
+                         |         Agent Layer           |
+                         |-------------------------------|
+                         | agent.py                     |
+                         | decision_engine.py           |
+                         | tool_dispatcher.py           |
+                         +---------------+--------------+
+                                         |
+                  +----------------------+----------------------+
+                  |                                             |
+                  |                                             |
+                  v                                             v
+      +-----------------------+                     +----------------------+
+      |      Groq LLM         |                     | Traditional Engine   |
+      |-----------------------|                     |----------------------|
+      | Market Analysis       |                     | DCA                 |
+      | Risk Evaluation       |                     | Swing Trading       |
+      | Portfolio Analysis    |                     | ATR Exit            |
+      | Tool Selection        |                     | Risk Manager        |
+      +-----------+-----------+                     +----------+----------+
+                  |                                             |
+                  +----------------------+----------------------+
+                                         |
+                                         v
+                           +---------------------------+
+                           |    Order Executor         |
+                           |---------------------------|
+                           | Paper Buy                |
+                           | Paper Sell               |
+                           +------------+-------------+
+                                        |
+                     +------------------+--------------------+
+                     |                                       |
+                     v                                       v
+        +------------------------+              +------------------------+
+        | Portfolio Storage      |              | CSV Logs              |
+        |------------------------|              |------------------------|
+        | portfolio.json         |              | trade_log.csv          |
+        | portfolio_history.csv  |              | paper_orders.csv       |
+        +------------------------+              +------------------------+
 ```
 
 ---
 
-# Current Status
+##  Trading Workflow
 
-### Implemented
+```
+                    Start Trading Cycle
+                           |
+                           |
+                           v
+              Download Latest BTC Market Data
+                           |
+                           v
+              Calculate Technical Indicators
+          (RSI, EMA50, SMA50, ATR, Volume)
+                           |
+                           v
+               Detect Market Regime
+      (Trending / Ranging / Panic Market)
+                           |
+                           v
+             Select Trading Strategy
+       (Hybrid / DCA / Swing / Hold)
+                           |
+                           |
+          +----------------+----------------+
+          |                                 |
+          |                                 |
+          v                                 v
+   Traditional Trading              LLM Analysis
+   --------------------             -------------------
+   • DCA Logic                     • Analyze Market
+   • Swing Logic                   • Analyze Portfolio
+   • ATR Exit                      • Choose Tool
+   • Risk Checks                   • Explain Reasoning
+          |                                 |
+          +----------------+----------------+
+                           |
+                           v
+                 Decision Engine
+                           |
+                           v
+                 Tool Dispatcher
+                           |
+         +-----------------+----------------+
+         |                                  |
+         |                                  |
+         v                                  v
+     Market Buy                       Market Sell
+         |                                  |
+         +-----------------+----------------+
+                           |
+                           v
+                 Update Portfolio
+                           |
+                           v
+                 Save Trade Logs
+                           |
+                           v
+         Update Dashboard & AI Chat
+                           |
+                           v
+                  Next 30 Minute Cycle
+```
 
-- ✅ Market Data Engine
-- ✅ Feature Engineering
-- ✅ Portfolio State Manager
-- ✅ DCA Engine
-- ✅ ATR Opportunity Buy
-- ✅ ATR Protective Sell
-- ✅ Swing Trading
-- ✅ ATR Stop Loss
-- ✅ Trailing Stop
-- ✅ Market Regime Detection
-- ✅ Strategy Selection
-- ✅ Portfolio Risk Layer
-- ✅ Performance Metrics
-- ✅ Backtesting Framework
+---
+ ## LLM Architecture
+```
+Explain
 
-### Planned
+System Prompt
 
-- ⏳ Google Sheet Config Manager
-- ⏳ Telegram Notifications
-- ⏳ Weekly Gmail Reports
-- ⏳ LLM Strategy Module
-- ⏳ Docker Deployment
-- ⏳ AWS/DigitalOcean Deployment
+↓
+
+Conversation Memory
+
+↓
+
+Market State
+
+↓
+
+Portfolio
+
+↓
+
+LLM
+
+↓
+
+JSON Decision
+
+↓
+
+Validation
+
+↓
+
+Tool Dispatcher
+
+↓
+
+Execution
+
+↓
+
+Explanation
+```
+---
+
+##  Project Structure
+
+```
+Trading_Agent/
+│
+├── app.py                        # Single entry point — sidebar navigation (Dashboard / AI Chat)
+├── dashboard.py                   # Dashboard page (render())
+├── chatbot.py                      # AI Chat page (render()) — sidebar help + example questions
+├── run_bot.py                       # Entry point for the autonomous live trading loop
+│
+├── core/
+│   ├── agent.py                       # Orchestrates the chat agent's reasoning loop
+│   ├── live_agent.py                   # run_live_agent() — the autonomous trading cycle
+│   ├── decision_engine.py               # LLM-driven trade decision + confidence scoring
+│   ├── tool_dispatcher.py                # Routes LLM tool calls to real functions
+│   ├── tools.py                           # Tool implementations available to the LLM
+│   │
+│   ├── llm_agent.py                        # Groq API wrapper / LLM calls
+│   ├── assistant_prompt.py                  # System prompt for the chat assistant
+│   ├── prompt.py                              # System prompt for the trading decision engine
+│   │
+│   ├── market_data.py                          # Market data ingestion (yfinance)
+│   ├── indicators.py                            # Technical indicator calculations
+│   ├── regime.py                                  # Market regime detection
+│   ├── strategy.py                                 # Strategy selection logic
+│   │
+│   ├── order_executor.py                            # Executes paper trades (market_buy, etc.)
+│   ├── paper_orders.py                                # Paper order management
+│   ├── portfolio.py                                    # Portfolio object / calculations
+│   ├── portfolio_storage.py                              # Portfolio load/save (persistence)
+│   ├── portfolio_history.py                                # Historical portfolio tracking
+│   │
+│   ├── risk_manager.py                                       # portfolio_stop() risk control
+│   ├── atr_sell.py                                             # manage_active_trades() — ATR exits
+│   ├── swing.py                                                  # Swing trading entry + open logic
+│   ├── dca.py                                                      # DCA strategy logic
+│   │
+│   ├── config_loader.py                                              # Loads strategy/risk config
+│   ├── telegram_bot.py                                                 # send_message() — Telegram alerts
+│   │
+│   ├── guardrails.py                                                     # Topic-scoping for the chat assistant
+│   ├── conversation.py                                                    # Chat message history management
+│   ├── logs.py                                                              # Structured event logging
+│   │
+│   └── data/
+│       ├── trade_log.csv                                                      # Trade history
+│       ├── paper_orders.csv                                                    # Paper order history
+│       ├── portfolio.json                                                       # Portfolio state
+│       └── portfolio_history.csv                                                  # Portfolio value over time
+│
+├── requirements.txt
+└── README.md
+```
 
 ---
 
-# Disclaimer
+##  Guardrails
 
-This project is for educational and research purposes only.
+The LLM assistant is deliberately restricted to cryptocurrency trading topics only.
 
-Cryptocurrency trading involves substantial risk. Past performance does not guarantee future results. Always conduct your own research before deploying automated trading systems with real capital.
+**Allowed:**
+- Bitcoin & crypto markets
+- Portfolio state and performance
+- Orders and trade history
+- Trading strategies and technical indicators
+- AI decision explanations
+
+**Politely refused:**
+- Personal questions
+- Politics
+- Homework / general coding help
+- Medical advice
+- General knowledge unrelated to trading
+- Any other off-topic conversation
+
+This ensures the assistant behaves predictably and stays within its intended domain — an important consideration when deploying LLMs in any user-facing product.
+
+---
+
+##  Tech Stack
+
+| Category              | Tools / Libraries                     |
+|------------------------|----------------------------------------|
+| **Language**            | Python                                |
+| **AI / LLM**             | Groq API, Llama 3.3 70B              |
+| **Data Processing**       | Pandas, NumPy                       |
+| **Market Data**            | Yahoo Finance (`yfinance`)         |
+| **Technical Analysis**      | `ta` library                      |
+| **Dashboard / UI**           | Streamlit, Plotly                |
+| **Notifications**             | Telegram Bot API               |
+| **Persistence**                 | CSV, JSON                    |
+
+---
+
+##  Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Rinalpatel21/Trading_Agent.git
+cd Trading_Agent
+```
+
+### 2. Create a virtual environment
+
+```bash
+python -m venv .venv
+```
+
+### 3. Activate it
+
+**Windows**
+```bash
+.venv\Scripts\activate
+```
+
+**macOS / Linux**
+```bash
+source .venv/bin/activate
+```
+
+### 4. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Configure environment variables
+
+Create a `.env` file in the project root:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+TELEGRAM_CHAT_ID=your_telegram_chat_id_here
+```
+
+> Update the exact variable names above to match what `core/telegram_bot.py` and `core/config_loader.py` actually read — adjust if your implementation names them differently.
+
+For deployment on **Hugging Face Spaces**, add each of these under **Settings → Secrets** instead of a `.env` file.
+
+### 6. Configure strategy & risk settings
+
+Strategy thresholds (drawdown tiers, DCA buy sizes, risk limits) are loaded via `core/config_loader.py`. Review and adjust your config file to set:
+
+- Drop-percentage tiers (`drop_1`, `drop_2`, `drop_3`) and their corresponding buy sizes
+- Initial capital
+- Risk/drawdown stop limits
+
+---
+
+## Running the App
+
+The dashboard and AI chat live in a **single Streamlit app** with sidebar navigation:
+
+```bash
+streamlit run app.py
+```
+
+Then, in the sidebar, switch between:
+
+- ** Dashboard** — portfolio value, charts, trade analytics
+- ** AI Chat** — ask questions like *"Should I buy Bitcoin?"* or *"Show my recent trades"*, guided by the built-in sidebar help panel and example-question expander
+
+### Running the autonomous trading bot
+
+```bash
+python run_bot.py
+```
+
+Each cycle, the bot will:
+
+1. Load the current portfolio and config
+2. Download the latest BTC market data and calculate indicators
+3. Execute an initial DCA buy if this is the first run
+4. Build a full market state and request an AI-generated recommendation with a confidence score
+5. Execute the recommended trade (subject to risk-adjusted position limits)
+6. Apply tiered/weekly DCA rules independently of the LLM
+7. Manage swing trade entries and exits
+8. Apply ATR-based exit management to open positions
+9. Check the portfolio risk stop
+10. Update and persist portfolio state and history
+11. Send Telegram notifications for the decision and overall status
+
+Schedule `run_bot.py` with cron, Windows Task Scheduler, or a hosted job runner to keep the loop running continuously.
+
+---
+
+##  Skills Demonstrated
+
+- **LLM integration with guardrails** — combining generative reasoning with deterministic control and topic scoping
+- **Tool-calling / function-dispatch architecture** for LLM-driven actions, including confidence-scored decisions
+- **Autonomous scheduled agent design** — a live trading loop with layered strategy logic, error handling, and state persistence
+- **Quantitative strategy design** (tiered DCA, swing trading, volatility-based exits)
+- **Risk management logic** independent of the LLM's recommendations, including portfolio-level stop conditions
+- **Third-party API integration** for real-time notifications (Telegram Bot API)
+- **Full-stack Python application design** with a clearly separated `core/` package structure
+- **Interactive data visualization** with Streamlit and Plotly
+- **Stateful conversational AI** with session and conversation history management, and UX-focused onboarding (sidebar help, example prompts)
+- **Structured logging and auditability** for a system making financial decisions
+
+---
+
+## Images 
+![Chatbot](chatbot.png)
+![Dashboard](dashboard.png)
+![Performance](performance.png)
+![Telegram](telegram.png)
+
+##  Author
+
+**Rinal Patel**
+Data Science • Machine Learning • Business Analytics • AI
+
+- GitHub: [Rinalpatel21](https://github.com/Rinalpatel21)
+- LinkedIn: [rinalpatel-datascientist](https://www.linkedin.com/in/rinalpatel-datascientist)
