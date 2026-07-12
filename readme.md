@@ -601,10 +601,11 @@ Schedule `run_bot.py` with cron, Windows Task Scheduler, or a hosted job runner 
 ---
 
 ## Images 
-![Chatbot](chatbot.png)
-![Dashboard](dashboard.png)
-![Performance](performance.png)
-![Telegram](telegram.png)
+<img width="1882" height="839" alt="chatbot" src="https://github.com/user-attachments/assets/2420fb8e-c09a-4ca8-9556-be5440f48f2d" />
+<img width="1565" height="796" alt="dashboard" src="https://github.com/user-attachments/assets/94c2ce26-0e9c-425f-a104-d12971a32486" />
+<img width="1466" height="846" alt="performance" src="https://github.com/user-attachments/assets/2502b400-e5f8-433f-977e-f020430e4537" />
+<img width="652" height="778" alt="telegram" src="https://github.com/user-attachments/assets/c9373937-0e99-4790-8c60-04cddc7aa4fb" />
+
 
 ##  Author
 
