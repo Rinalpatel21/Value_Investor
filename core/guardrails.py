@@ -1,4 +1,4 @@
-def validate_trade(decision, market_state):
+def validate_trade(decision, market_context):
     """
     Validate AI decisions before execution.
     Returns:
@@ -17,10 +17,10 @@ def validate_trade(decision, market_state):
         if amount <= 0:
             return False, "Buy amount must be positive."
 
-        if amount > market_state["cash"]:
+        if amount > market_context["cash"]:
             return False, "Not enough cash."
 
-        if amount > market_state["max_buy_amount"]:
+        if amount > market_context["max_buy_amount"]:
             return False, "Buy exceeds risk limit."
 
         return True, "Buy approved."
@@ -32,10 +32,10 @@ def validate_trade(decision, market_state):
         if quantity <= 0:
             return False, "Quantity must be positive."
 
-        if quantity > market_state["btc"]:
+        if quantity > market_context["btc"]:
             return False, "Trying to sell more BTC than owned."
 
-        if quantity > market_state["max_sell_quantity"]:
+        if quantity > market_context["max_sell_quantity"]:
             return False, "Sell exceeds risk limit."
 
         return True, "Sell approved."

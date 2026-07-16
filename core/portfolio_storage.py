@@ -1,9 +1,12 @@
 import json
 from .portfolio import Portfolio
 import pandas as pd
-
+from pathlib import Path
 
 def save_portfolio(portfolio):
+    
+    BASE_DIR = Path(__file__).resolve().parent
+    PORTFOLIO_FILE = BASE_DIR / "data" / "portfolio.json"
 
     data = {
 
@@ -25,16 +28,19 @@ def save_portfolio(portfolio):
 
     }
 
-    with open("portfolio.json", "w") as f:
+    with open(PORTFOLIO_FILE, "w") as f:
 
         json.dump(data, f, indent=4)
 
 
 def load_portfolio(initial_capital):
 
+    BASE_DIR = Path(__file__).resolve().parent
+    PORTFOLIO_FILE = BASE_DIR / "data" / "portfolio.json"
+
     try:
 
-        with open(".portfolio.json", "r") as f:
+        with open(PORTFOLIO_FILE, "r") as f:
 
             data = json.load(f)
 

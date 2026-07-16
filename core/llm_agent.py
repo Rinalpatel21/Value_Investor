@@ -7,6 +7,7 @@ from .prompt import SYSTEM_PROMPT
 from .conversation import add_message
 from .conversation import get_messages
 
+
 client = Groq(
     api_key=os.environ["GROQ_API_KEY"],
 )
@@ -23,7 +24,7 @@ def _parse_json_response(content):
     return json.loads(cleaned)
 
 
-def get_ai_decision(market_state):
+def get_ai_decision(market_context, ai_summary):
 
     response = client.chat.completions.create(
         model=MODEL,
@@ -34,7 +35,10 @@ def get_ai_decision(market_state):
             },
             {
                 "role": "user",
-                "content": str(market_state)
+                "content": json.dumps({
+                    "market_context": market_context,
+                    "ai_summary": ai_summary
+                })
             }
         ]
     )

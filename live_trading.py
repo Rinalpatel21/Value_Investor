@@ -19,7 +19,8 @@ from core.atr_sell import manage_active_trades
 from core.swing import swing_entry_signal, open_swing_trade
 
 from core.order_executor import market_buy
-
+from core.market_context import build_market_context
+from core.portfolio_manager import evaluate_portfolio
 
 def build_market_state(portfolio, row):
 
@@ -118,15 +119,35 @@ def run_live_agent():
         # LLM Decision
         ####################################
 
-        market_state = build_market_state(
-            portfolio,
-            row
-        )
+        ####################################
+        # Build AI Market Context
+        ####################################
 
-        decision, result = make_decision(market_state,
-                                        portfolio=portfolio,
-                                        current_time=current_time,
-                                        execute=True)
+        context = build_market_context(portfolio,row)
+
+        ####################################
+        # AI Portfolio Manager
+        ####################################
+
+        ai_summary = evaluate_portfolio(context)
+
+        print("\n===== AI Portfolio Manager =====")
+
+        print(ai_summary)
+
+        ####################################
+        # Decision Engine
+        ####################################
+
+        decision, result = make_decision(market_context=context,
+
+                       ai_summary=ai_summary,
+
+                      portfolio=portfolio,
+
+                      current_time=current_time,
+
+                      execute=True)
 
         save_portfolio(portfolio)
 
@@ -134,21 +155,35 @@ def run_live_agent():
         confidence = decision["analysis"]["confidence"]
         summary = decision["explanation"]["summary"]
 
-        send_message(
-            f"""
-AI Decision
+        send_message(f"""
+            AI Portfolio Manager
 
-Action: {tool}
+            Recommendation:
+            {ai_summary['recommendation']}
 
-Confidence: {confidence:.2f}
+            Market:
+            {ai_summary['market_summary']}
 
-Execution:
-{result}
+            Risk:
+            {ai_summary['risk_level']}
 
-Reason:
-{summary}
-"""
-        )
+            Reason:
+            {ai_summary['reasoning']}
+
+            -------------------------
+
+            Execution Engine
+
+            Action:
+            {tool}
+
+            Confidence:
+            {confidence:.2f}
+
+            Execution:
+            {result}
+
+        """)
 
         ####################################
         # Existing Strategy Logic
@@ -276,21 +311,21 @@ Reason:
 
         send_message(
             f"""
-BTC Agent Status
+                BTC Agent Status
 
-Price: ${current_price:.2f}
+                Price: ${current_price:.2f}
 
-Regime: {regime}
+                Regime: {regime}
 
-Strategy: {strategy}
+                Strategy: {strategy}
 
-Portfolio: ${portfolio_value:.2f}
+                Portfolio: ${portfolio_value:.2f}
 
-Cash: ${portfolio.cash:.2f}
+                Cash: ${portfolio.cash:.2f}
 
-BTC: {portfolio.total_btc():.6f}
-"""
-        )
+                BTC: {portfolio.total_btc():.6f}
+                """
+                        )
 
         print("Trading cycle complete.")
 
