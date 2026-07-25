@@ -1,4 +1,4 @@
-import os
+
 import yagmail
 from dotenv import load_dotenv
 from .env_loader import EMAIL, APP_PASSWORD

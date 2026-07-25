@@ -4,151 +4,205 @@ from core.agent import run_agent
 
 def render():
 
-    st.title("🤖 BTC AI Trading Assistant")
+    st.title("🤖 AI Bitcoin Trading Assistant")
 
     st.caption(
-        "Ask questions about your portfolio, Bitcoin market, trading history, AI decisions, and trading performance."
+        "Your intelligent cryptocurrency copilot. Analyze your portfolio, explain AI recommendations, inspect market conditions, execute paper trades, and answer questions about your Bitcoin trading system."
     )
 
-    # -----------------------------
-    # Sidebar Help
-    # -----------------------------
+    # --------------------------------------------------
+    # Sidebar
+    # --------------------------------------------------
+
     with st.sidebar:
 
-        st.header("📖 What can I help with?")
+        st.header("🚀 Capabilities")
 
         st.markdown("""
-### 💼 Portfolio
+### 💼 Portfolio Analysis
+
 - Show my portfolio
-- What is my portfolio value?
-- How much cash do I have?
-- How much BTC do I own?
-- What is my average buy price?
+- Portfolio value
+- Cash balance
+- BTC holdings
+- Average cost
+- Portfolio health
 
 ---
 
-### 📈 Market Analysis
-- What is the BTC price?
-- What's the current market regime?
-- What strategy is active?
-- Explain today's market conditions.
+### 📈 Market Intelligence
+
+- Current BTC price
+- RSI
+- ATR
+- EMA50 / SMA50
+- Current market regime
+- Active strategy
+- Explain today's market
 
 ---
 
-### 📊 Trading Performance
-- How much money have I made?
-- Show my trading performance.
-- What is my total return?
-- Am I profitable?
+### 🤖 AI Portfolio Advisor
 
----
-
-### 📑 Trade History
-- Show recent trades.
-- What was my last trade?
-- Show paper orders.
-- When did I last buy Bitcoin?
-
----
-
-### 🤖 AI Decisions
 - Should I buy Bitcoin?
-- Should I sell Bitcoin?
-- Why did the AI recommend buying?
-- Explain today's recommendation.
-- Analyze my trading account.
+- Should I sell?
+- Explain today's recommendation
+- Analyze my portfolio
+- Show AI report
+- What's today's risk?
 
 ---
 
-### 🛡 Supported Topics
-This assistant only answers questions related to:
+### 📰 News Intelligence
 
-- Bitcoin
-- Portfolio
-- Trading
-- Orders
-- Performance
-- Technical indicators
-- AI trading decisions
+- Show Bitcoin news
+- Latest market news
+- News sentiment
+- Important events
+- Market opportunities
+- Current risks
+
+---
+
+### 📑 Trading Activity
+
+- Recent trades
+- Last trade
+- Paper orders
+- Trade history
+
+---
+
+### 📊 Performance
+
+- Portfolio performance
+- Profit & Loss
+- Total return
+- Portfolio allocation
+
+---
+
+### 💸 Paper Trading
+
+- Buy $100 BTC
+- Buy $500 Bitcoin
+- Sell 0.01 BTC
+- Sell 0.005 BTC
 """)
 
-        st.info(
-            "Questions unrelated to cryptocurrency trading will be politely declined."
+        st.success(
+            "The assistant only answers questions related to your Bitcoin trading system."
         )
 
-    # -----------------------------
-    # Chat History
-    # -----------------------------
+    # --------------------------------------------------
+    # Conversation History
+    # --------------------------------------------------
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.write(msg["content"])
+    for message in st.session_state.messages:
 
-    # -----------------------------
-    # Suggested Questions
-    # -----------------------------
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-    with st.expander("💡 Example Questions"):
+    # --------------------------------------------------
+    # Suggested Prompts
+    # --------------------------------------------------
+
+    with st.expander("💡 Try asking..."):
 
         st.markdown("""
-**Portfolio**
+### Portfolio
+
 - Show my portfolio
 - What is my portfolio value?
 - How much BTC do I own?
+- How much cash do I have?
+- What's my average buy price?
 
-**Market**
-- What's the BTC price?
-- What market regime are we in?
-- Which strategy is active?
+---
 
-**Trades**
-- Show recent trades
-- What was my last trade?
-- Show paper orders
+### AI Analysis
 
-**Performance**
-- How much money have I made?
-- What's my profit?
-- Show my trading performance
-
-**AI**
 - Analyze my portfolio
 - Should I buy Bitcoin?
 - Should I sell Bitcoin?
-- Why did the AI recommend this trade?
+- Explain today's recommendation
+- Show AI report
+- What is today's risk level?
+
+---
+
+### Market
+
+- Explain today's market
+- Show market summary
+- What's today's trading strategy?
+- What's the market regime?
+- Show technical indicators
+
+---
+
+### News
+
+- Show today's Bitcoin news
+- Summarize market news
+- What's the news sentiment?
+- What are today's risks?
+- What opportunities exist?
+
+---
+
+### Trading
+
+- Buy $100 Bitcoin
+- Buy $500 BTC
+- Sell 0.01 BTC
+- Show my recent trades
+- Show paper orders
+
+---
+
+### Performance
+
+- How am I performing?
+- Show portfolio performance
+- What's my profit?
+- What's my total return?
 """)
 
-    # -----------------------------
+    # --------------------------------------------------
     # Chat Input
-    # -----------------------------
+    # --------------------------------------------------
 
-    question = st.chat_input(
-        "Ask about your portfolio, BTC, trades, or AI decisions..."
+    prompt = st.chat_input(
+        "Ask anything about your Bitcoin portfolio, market, AI recommendations, news, or paper trading..."
     )
 
-    if question:
+    if prompt:
 
         st.session_state.messages.append(
             {
                 "role": "user",
-                "content": question
+                "content": prompt
             }
         )
 
         with st.chat_message("user"):
-            st.write(question)
+            st.markdown(prompt)
 
-        answer = run_agent(question)
+        with st.chat_message("assistant"):
+
+            with st.spinner("Analyzing..."):
+
+                response = run_agent(prompt)
+
+                st.markdown(response)
 
         st.session_state.messages.append(
             {
                 "role": "assistant",
-                "content": answer
+                "content": response
             }
         )
-
-        with st.chat_message("assistant"):
-            st.write(answer)

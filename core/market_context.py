@@ -1,5 +1,4 @@
 from .portfolio_storage import load_portfolio
-
 from .news import get_bitcoin_news
 from .news_sentiment import analyze_news
 from .fear_greed import get_fear_greed

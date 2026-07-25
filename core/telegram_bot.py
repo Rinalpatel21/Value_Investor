@@ -1,4 +1,3 @@
-import os
 import requests
 from dotenv import load_dotenv
 from .env_loader import BOT_TOKEN, CHAT_ID

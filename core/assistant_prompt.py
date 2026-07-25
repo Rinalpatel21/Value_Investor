@@ -22,23 +22,24 @@ return JSON again.
 
 Available tools are:
 
-get_portfolio
-get_recent_orders
-get_performance
+show_portfolio
+show_orders
+show_trade_history
 get_market_summary
 market_buy
 market_sell
-hold
+show_market_context
+show_news
+show_ai_report
 
-Do NOT invent tool names.
-Do NOT use execute_dca_buy.
-Do NOT use buy_bitcoin.
-Do NOT use sell_bitcoin.
+
+
+
 
 Example
 
 {
-    "tool":"get_portfolio"
+    "tool":"show_portfolio"
 }
 
 When you have enough information,
@@ -61,7 +62,7 @@ Show my portfolio
 Return
 
 {
-    "tool":"get_portfolio"
+    "tool":"show_portfolio"
 }
 
 Do NOT use markdown.
@@ -83,7 +84,7 @@ Show recent trades
 Return
 
 {
-    "tool":"get_recent_orders"
+    "tool":"show_orders"
 }
 
 User:
@@ -98,16 +99,13 @@ Return
 
 
 
-
-
-
 User:
 Show recent trades
 
 Return
 
 {
-    "tool":"get_recent_orders"
+    "tool":"show_trade_history"
 }
 
 User:
@@ -116,7 +114,7 @@ How am I doing?
 Return
 
 {
-    "tool":"get_performance"
+    "tool":"show_market_context"
 }
 
 user:
@@ -134,7 +132,9 @@ Return
 
 {
     "tool":"market_buy",
-    "amount":500
+    "args":{
+        "amount":500
+    }
 }
 
 User:
@@ -144,16 +144,16 @@ Return
 
 {
     "tool":"market_buy",
-    "amount":250
+    "args":{
+        "amount":250
+    }
 }
 
 User:What was my last trade?
 Return
 
 {
-    "tool":"market_sell",
-    "quantity":0.001
-}
+    "tool":"show_trade_history"
 
 User:
 
@@ -162,14 +162,7 @@ What was my last trade?
 Return
 
 {
-    "tool":"get_last_trade"
-}
-
-user: How much money have I made?
-Return
-
-{
-    "tool":"get_profit_loss"
+    "tool":"show_trade_history"
 }
 
 User:
@@ -178,7 +171,7 @@ Analyze my trading account
 Return
 
 {
-    "tool":"get_trading_context"
+    "tool":"show_market_context"
 }
 
 If the user asks about:
@@ -193,12 +186,46 @@ If the user asks about:
 Prefer
 
 {
-    "tool":"get_trading_context"
+    "tool":"show_market_context"
 }
 
 instead of requesting several smaller tools.
+ 
+User:
+Show today's Bitcoin news
 
+Return
 
+{
+   "tool":"show_news"
+}
+User:
+Show AI report
 
+Return
+
+{
+   "tool":"show_ai_report"
+}
+
+If the user asks:
+
+Should I buy?
+
+Should I sell?
+
+Explain today's market.
+
+Analyze my account.
+
+Analyze my portfolio.
+
+Should I DCA?
+
+Return
+
+{
+   "tool":"show_market_context"
+}
 
 """

@@ -1,23 +1,20 @@
 {
-    "sentiment": "Bullish",
-    "score": 0.6,
-    "summary": "The recent news headlines indicate a growing interest in Bitcoin and cryptocurrency, with potential use cases in sports broadcasting and economic diversification. However, geopolitical tensions and regulatory concerns may pose risks to the industry.",
+    "sentiment": "Bearish",
+    "score": -0.3,
+    "summary": "Geopolitical tensions, market volatility, and regulatory scrutiny contribute to a bearish sentiment, despite some positive inflows into Bitcoin and Ethereum ETFs.",
     "risks": [
-        "Geopolitical tensions in the Middle East",
-        "Stricter global crypto regulations",
-        "Ransomware ecosystem and cybercrime",
-        "Inflationary pressures and monetary policy changes"
+        "Geopolitical tensions in Iran and US-China trade relations",
+        "Market volatility and regulatory scrutiny",
+        "Potential destabilization of global markets and inflation"
     ],
     "opportunities": [
-        "Growing role of crypto in sports broadcasting",
-        "Diversification into digital assets for Gulf states",
-        "Infrastructure development and treasury accumulation",
-        "Potential for increased adoption and investment"
+        "Growing investor confidence in Bitcoin and Ethereum ETFs",
+        "Increased mainstream adoption of cryptocurrencies",
+        "Potential for blockchain integration in major sports and industries"
     ],
     "important_events": [
-        "MicroStrategy's $1.5 billion Bitcoin buy",
-        "Cathie Wood's personal Bitcoin investment",
-        "US Central Command's accusations against Iran",
-        "Trump's reversal of Hormuz toll plan"
+        "US airstrikes on northern Iran",
+        "US spot Bitcoin ETFs pull in $108M",
+        "South Korea's finance ministry calls emergency market meeting"
     ]
 }

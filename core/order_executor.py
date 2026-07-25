@@ -7,7 +7,18 @@ from .telegram_bot import send_message
 PAPER_MODE = True
 
 
-def market_buy(portfolio, price, amount, current_time):
+def market_buy(
+    portfolio,
+
+    price,
+
+    amount,
+
+    current_time,
+
+    source
+
+):
 
     if amount <= 0:
         return {"status": "rejected", "reason": "Buy amount must be positive."}
@@ -44,23 +55,21 @@ def market_buy(portfolio, price, amount, current_time):
 
                  BTC Holdings: {portfolio.total_btc():.6f}""")
 
-    save_order("BUY",
+    save_order(
 
-               execution_price,
-
-               actual_amount,
-
-               portfolio.cash,
-
-               portfolio.total_btc(),
-
-               current_time)
+                    "BUY",
+                    execution_price,
+                    actual_amount,
+                    portfolio.cash,
+                    portfolio.total_btc(),
+                    current_time,
+                    source)
 
     return {
         "status": "executed",
         "side": "BUY",
         "price": execution_price,
-        "amount": amount,
+        "quantity": amount,
         "cash": portfolio.cash,
         "btc": portfolio.total_btc()
     }
@@ -68,32 +77,38 @@ def market_buy(portfolio, price, amount, current_time):
 
 def market_sell(
     portfolio,
-    quantity,
+
     price,
-    current_time
+
+    amount,
+
+    current_time,
+
+    source
+
 ):
 
-    if quantity <= 0:
-        return {"status": "rejected", "reason": "Sell quantity must be positive."}
+    if amount <= 0:
+        return {"status": "rejected", "reason": "Sell amount must be positive."}
 
-    if quantity > portfolio.total_btc():
-        return {"status": "rejected", "reason": "Sell quantity exceeds BTC holdings."}
+    if amount > portfolio.total_btc():
+        return {"status": "rejected", "reason": "Sell amount exceeds BTC holdings."}
 
-    fee = quantity * price * 0.001
+    fee = amount * price * 0.001
 
     execution_price = price * (
         1 + random.uniform(-0.0005, 0.0005)
     )
 
     cash_received = (
-        quantity *
+        amount *
         execution_price
     ) - fee
 
     portfolio.cash += cash_received
 
-    swing_quantity = min(quantity, portfolio.btc_swing)
-    dca_quantity = quantity - swing_quantity
+    swing_quantity = min(amount, portfolio.btc_swing)
+    dca_quantity = amount - swing_quantity
 
     portfolio.btc_swing -= swing_quantity
 
@@ -118,23 +133,21 @@ def market_sell(
 
     print("PAPER SELL")
 
-    save_order("SELL",
-
-               execution_price,
-
-                quantity,
-
-                portfolio.cash,
-
-                portfolio.total_btc(),
-
-                current_time)
+    save_order(
+        "SELL",
+        execution_price,
+        amount,
+        portfolio.cash,
+        portfolio.total_btc(),
+        current_time,
+        source
+    )
     
     send_message(f""" PAPER SELL
 
                  Price: ${execution_price:.2f}
 
-                 Quantity: {quantity:.6f}
+                 Quantity: {amount:.6f}
 
                  Cash Left: ${portfolio.cash:.2f}
 
@@ -144,7 +157,7 @@ def market_sell(
         "status": "executed",
         "side": "SELL",
         "price": execution_price,
-        "quantity": quantity,
+        "quantity": amount,
         "cash": portfolio.cash,
         "btc": portfolio.total_btc()
     }

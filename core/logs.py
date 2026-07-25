@@ -3,7 +3,7 @@ import json
 
 def log_event(event):
 
-    with open("logs.jsonl", "a") as f:
+    with open("logs.json", "a") as f:
 
         f.write(
             json.dumps(

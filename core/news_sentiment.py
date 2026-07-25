@@ -19,8 +19,16 @@ Return ONLY JSON.
     "opportunities":[],
     "important_events":[]
 }
-"""
 
+Rules:
+- score must be a REAL NUMBER between -1.0 and 1.0
+- -1.0 = extremely bearish
+- -0.5 = bearish
+- 0.0 = neutral
+- 0.5 = bullish
+- 1.0 = extremely bullish
+- The score must reflect the overall balance of the news.
+"""
 
 def analyze_news(news_articles):
 

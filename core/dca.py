@@ -1,7 +1,3 @@
-from datetime import datetime
-from .config import load_config
-from .logger import log_trade
-from .telegram_bot import send_message
 
 
 def execute_dca_buy(

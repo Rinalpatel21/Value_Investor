@@ -13,7 +13,8 @@ def save_order(
     amount,
     cash,
     btc,
-    current_time
+    current_time, 
+    source
 ):
 
     csv_path = get_data_path("paper_orders.csv")
@@ -37,7 +38,8 @@ def save_order(
                 "Price",
                 "Amount",
                 "Cash",
-                "BTC"
+                "BTC",
+                "Source"
             ])
 
         writer.writerow([
@@ -46,5 +48,6 @@ def save_order(
             price,
             amount,
             cash,
-            btc
+            btc,
+            source
         ])

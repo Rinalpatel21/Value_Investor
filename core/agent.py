@@ -1,20 +1,11 @@
 import json
-
 from .llm_agent import ask_agent
-from .llm_agent import explain_tool_result
-
-from .conversation import (
-    add_message,
-    get_messages,
-    clear_messages
-)
-
+from .conversation import add_message, clear_messages
 from .tool_dispatcher import execute_tool
-
 from .logs import log_event
-from .decision_engine import make_decision
 from .llm_agent import _parse_json_response
 from .guardrails import is_off_topic
+
 
 def run_agent(user_prompt):
 
@@ -39,6 +30,7 @@ def run_agent(user_prompt):
 
        
        response = ask_agent()
+       print(response)
        add_message("assistant", response)
 
        try:
@@ -59,7 +51,8 @@ def run_agent(user_prompt):
           result = execute_tool(data)
        except Exception as e:
           return f"Tool execution failed: {e}"
-
+       
+       
        log_event({"prompt": user_prompt,
                   "tool": data,
                  "result": json.loads(json.dumps(result, default=str))})
@@ -76,10 +69,3 @@ def run_agent(user_prompt):
 
 
 
-
-def run_trading_agent(market_state):
-
-    return make_decision(
-        market_state,
-        execute=True
-    )

@@ -1,5 +1,3 @@
-from logging import config
-
 from .config import load_config
 from .telegram_bot import send_message
 

@@ -1,10 +1,8 @@
 import os
 import json
-
 from groq import Groq
 from .assistant_prompt import ASSISTANT_PROMPT
 from .prompt import SYSTEM_PROMPT
-from .conversation import add_message
 from .conversation import get_messages
 
 
@@ -79,27 +77,3 @@ def ask_agent():
     return answer
 
 
-def explain_tool_result(user_question, tool_result):
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": ASSISTANT_PROMPT
-            },
-            {
-                "role": "user",
-                "content": user_question
-            },
-            {
-                "role": "assistant",
-                "content": "I executed the requested tool."
-            },
-            {
-                "role": "user",
-                "content": f"Tool Result:\n{tool_result}\n\nExplain this to me."
-            }
-        ]
-    )
-
-    return response.choices[0].message.content
