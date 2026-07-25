@@ -462,13 +462,13 @@ Data Science | Machine Learning | Generative AI | Financial Analytics
 ---
 
 ## Images
-![Chatbot](chatbot-1.png)
-![Chatbot news](<chatbot news.png>)
-![Performance](performance.png)
-![Dashboard](dashboard.png)
-![Telegram msg](<telegram msg.png>)
-![Chatbot buy](<chatbot buy.png>)
-![Trading activity](<Trading activity.png>)
-![News sentiment](<news sentiment.png>)
-![AI Reasoning](<rules and AI.png>)
-![Telegram news](<Telegram news.png>)
+![Chatbot](images/chatbot-1.png)
+![Chatbot news](images/chatbot%20news.png)
+![Performance](images/performance.png)
+![Dashboard](images/dashboard.png)
+![Telegram msg](images/telegram%20msg.png)
+![Chatbot buy](images/chatbot%20buy.png)
+![Trading activity](images/Trading%20activity.png)
+![News sentiment](images/news%20sentiment.png)
+![AI Reasoning](images/rules%20and%20AI.png)
+![Telegram news](images/Telegram%20news.png)
