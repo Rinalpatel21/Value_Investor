@@ -19,16 +19,9 @@ execute trades keeping the trading logic reliable, deterministic, and safe.
 - [Project Structure](#project-structure)
 - [How a Trading Cycle Works](#how-a-trading-cycle-works)
 - [Technologies Used](#technologies-used)
-- [Getting Started](#getting-started)
-- [Configuration](#configuration)
-- [Running the App](#running-the-app)
 - [Dashboard](#dashboard)
-- [AI Safety](#ai-safety)
-- [Key Design Principles](#key-design-principles)
 - [Future Improvements](#future-improvements)
-- [Author](#author)
-- [License](#license)
-- [Images](#Images)
+- [Images](#images)
 
 ---
 
@@ -332,70 +325,6 @@ cycle has already executed and been saved.
 
 ---
 
-## Getting Started
-
-> Adjust the commands below to match your actual entry point and dependency
-> manager if they differ — this section assumes a standard Python +
-> Streamlit setup.
-
-### Prerequisites
-
-- Python 3.10+
-- A [Groq API key](https://console.groq.com/) for LLM access
-- A [NewsAPI key](https://newsapi.org/) for news ingestion
-- A Telegram bot token, if you want trade/alert notifications
-- `pip` for installing dependencies
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/Rinalpatel21/<repo-name>.git
-cd <repo-name>
-
-# Create and activate a virtual environment
-python -m venv venv
-source venv/bin/activate      # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
----
-
-## Configuration
-
-Create a `.env` file (or equivalent secrets file) in the project root with
-your API credentials:
-
-```env
-GROQ_API_KEY=your_groq_api_key
-NEWSAPI_KEY=your_newsapi_key
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-TELEGRAM_CHAT_ID=your_telegram_chat_id
-```
-
-> Update the variable names above to match whatever your codebase actually
-> reads — this is a placeholder based on the services listed in
-> [Technologies Used](#technologies-used).
-
----
-
-## Running the App
-
-```bash
-# Run one full trading cycle
-python live_trading.py
-
-# Launch the dashboard
-streamlit run dashboard.py
-
-# Launch the chatbot
-streamlit run chatbot.py
-```
-
----
-
 ## Dashboard
 
 The Streamlit dashboard provides a single view combining:
@@ -407,38 +336,6 @@ The Streamlit dashboard provides a single view combining:
 - News sentiment
 - Trading history
 - Portfolio allocation
-
----
-
-## AI Safety
-
-The LLM is **advisory only**. Structurally, it cannot:
-
-- Execute trades
-- Override trading rules
-- Modify portfolio state
-
-Only the deterministic rule engine (`order_executor.py`, guided by
-`strategy.py`, `swing.py`, `atr_sell.py`, and `risk_manager.py`) is capable of
-changing portfolio state. The AI advisor and chatbot are only ever given
-*read* access to that state — they can describe it, but nothing in their code
-path can write to it directly.
-
----
-
-## Key Design Principles
-
-- **Rule-based execution** — trading decisions are deterministic, not
-  AI-driven
-- **Explainable AI** — every recommendation comes with human-readable
-  reasoning
-- **Transparent recommendations** — confidence scores and risk levels are
-  always shown, not hidden behind a single verdict
-- **Deterministic trading** — the same inputs always produce the same trade
-  decision
-- **Modular architecture** — each concern lives in its own module
-- **Persistent portfolio state** — nothing is lost on restart
-- **Safe AI integration** — the LLM is sandboxed to read-only access
 
 ---
 
@@ -454,6 +351,16 @@ path can write to it directly.
 
 ---
 
+## Images
+![BTnews](images/news_sentiment.png)
+![Performance](images/performance.png)
+![Dashboard](images/dashboard.png)
+![Telegram msg](images/telegram_msg.png)
+![Trading activity](images/trading_activity.png)
+![Telegram news](images/Telegram_news.png)
+
+---
+
 ## Author
 
 **Rinal Patel**
@@ -462,13 +369,3 @@ Data Science | Machine Learning | Generative AI | Financial Analytics
 
 - GitHub: [Rinalpatel21](https://github.com/Rinalpatel21)
 - LinkedIn: [rinalpatel-datascientist](https://linkedin.com/in/rinalpatel-datascientist)
-
----
-
-## Images
-![BTnews](images/news_sentiment.png)
-![Performance](images/performance.png)
-![Dashboard](images/dashboard.png)
-![Telegram msg](images/telegram_msg.png)
-![Trading activity](images/trading_activity.png)
-![Telegram news](images/Telegram_news.png)
