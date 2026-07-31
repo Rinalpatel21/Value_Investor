@@ -28,6 +28,7 @@ execute trades keeping the trading logic reliable, deterministic, and safe.
 - [Future Improvements](#future-improvements)
 - [Author](#author)
 - [License](#license)
+- [Images](#Images)
 
 ---
 
