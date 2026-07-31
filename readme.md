@@ -96,6 +96,8 @@ The system automatically:
 Summarized results are cached locally (news_sentiment.json) and rendered on
 the dashboard, so the LLM isn't re-queried on every page load.
 
+![Chatbot](images/Chatbot.png)
+
 ### Rule-Based Trading Engine
 
 Every trading decision is made through deterministic rules.
@@ -139,6 +141,7 @@ Every simulated order is recorded with:
 
 **No real funds are used.** This is a simulation environment for strategy
 validation and research.
+![Trading_activity](images/trading_activity.png)
 
 ###  Streamlit Dashboard
 
@@ -463,13 +466,9 @@ Data Science | Machine Learning | Generative AI | Financial Analytics
 ---
 
 ## Images
-![Chatbot](images/chatbot-1.png)
-![Chatbot news](images/chatbot%20news.png)
+![BTnews](images/news_sentiment.png)
 ![Performance](images/performance.png)
 ![Dashboard](images/dashboard.png)
-![Telegram msg](images/telegram%20msg.png)
-![Chatbot buy](images/chatbot%20buy.png)
-![Trading activity](images/Trading%20activity.png)
-![News sentiment](images/news%20sentiment.png)
-![AI Reasoning](images/rules%20and%20AI.png)
-![Telegram news](images/Telegram%20news.png)
+![Telegram msg](images/telegram_msg.png)
+![Trading activity](images/trading_activity.png)
+![Telegram news](images/Telegram_news.png)
