@@ -96,7 +96,7 @@ The system automatically:
 Summarized results are cached locally (news_sentiment.json) and rendered on
 the dashboard, so the LLM isn't re-queried on every page load.
 
-![Chatbot](images/Chatbot.png)
+![Chatbot](images/chatbot.png)
 
 ### Rule-Based Trading Engine
 
